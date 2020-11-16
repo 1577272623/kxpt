@@ -74,7 +74,7 @@ public class LoginAop {
         }
         QueryWrapper<User> queryWrapper = new QueryWrapper(userDtoTemp);
         userDtoTemp = userService.getOne(queryWrapper);
-        user.setPassword(AesCipherUtil.encrypt(userDtoTemp.getAccount() + userDtoTemp.getPassword()));
+        user.setPassword(AesCipherUtil.encrypt(userDtoTemp.getAccount() + user.getPassword()));
 
 
         if (userDtoTemp == null) {
