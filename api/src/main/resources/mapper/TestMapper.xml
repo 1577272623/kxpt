@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.rongyungov.kxpt.dao.TestMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.rongyungov.kxpt.entity.Test">
+        <id column="id" property="id" />
+        <result column="keno" property="keno" />
+        <result column="stno" property="stno" />
+        <result column="st_type" property="stType" />
+        <result column="st_content" property="stContent" />
+        <result column="st_answer" property="stAnswer" />
+        <result column="ext1" property="ext1" />
+        <result column="ext2" property="ext2" />
+        <result column="ext3" property="ext3" />
+        <result column="revision" property="revision" />
+        <result column="created_by" property="createdBy" />
+        <result column="created_time" property="createdTime" />
+        <result column="updated_by" property="updatedBy" />
+        <result column="updated_time" property="updatedTime" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, keno, stno, st_type, st_content, st_answer, ext1, ext2, ext3, revision, created_by, created_time, updated_by, updated_time
+    </sql>
+
+</mapper>
