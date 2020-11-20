@@ -37,10 +37,11 @@ public class ExamController extends BaseController<ExamService,Exam> {
     public IPage<Exam> getExamList( @ApiParam(name="exam",value="筛选条件") @RequestBody(required = false) Exam exam  ,
                                 @ApiParam(name="pageIndex",value="页数",required=true,defaultValue = "1")@RequestParam Integer pageIndex ,
                                 @ApiParam(name="pageSize",value="页大小",required=true,defaultValue = "10")@RequestParam Integer pageSize
-                                ) {
+                                ) throws InstantiationException, IllegalAccessException {
         Page<Exam> page=new Page<Exam>(pageIndex,pageSize);
-        QueryWrapper<Exam> queryWrapper=new QueryWrapper<>(exam);
-        return service.page(page,queryWrapper);
+        QueryWrapper<Exam> queryWrapper=exam.toWrapper(exam);
+        IPage<Exam> examIPage = service.page(page,queryWrapper);
+        return examIPage;
     }
 
     /**
