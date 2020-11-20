@@ -49,6 +49,12 @@ public class CourseListController extends BaseController<CourseListService,Cours
         return service.page(page,queryWrapper);
     }
 
+    /**
+     * @description : 分级获取分页列表
+     * ---------------------------------
+     * @author : li
+     * @since : Create in 2020-11-16
+     */
     @PostMapping("/listAll")
     @ApiOperation(value = "获取课程目录数据信息")
     public List<CourseList> getAllCourseListList() {
