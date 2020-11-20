@@ -12,7 +12,7 @@ public class GenUtils {
                         "role_menu","student","time_space","time_template","sys_user","user_role"
                 }*/
                 new String[]{"student","teacher","sys_user","user_role","course_data","course_list",
-                "test","exam","menu","role_menu","dictionary","role","role_menu",}
+                "test","exam","menu","role_menu","dictionary","role","role_menu","department","grade"}
                 ,
                 "root", "mysql@liang",
                 "jdbc:mysql://120.78.191.175:3306/kxpt?useSSL=false&useUnicode=true&characterEncoding=UTF-8&serverTimezone=Hongkong&allowMultiQueries=true");

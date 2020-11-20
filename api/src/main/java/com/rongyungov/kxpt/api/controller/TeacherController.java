@@ -46,7 +46,6 @@ public class TeacherController extends BaseController<TeacherService,Teacher> {
         Page<Teacher> page=new Page<Teacher>(pageIndex,pageSize);
         QueryWrapper<Teacher> queryWrapper=teacher.toWrapper(teacher);
         IPage<Teacher> TeacherIPage = service.page(page,queryWrapper);
-
         return TeacherIPage;
     }
 
