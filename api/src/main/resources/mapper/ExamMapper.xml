@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.rongyungov.kxpt.dao.ExamMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.rongyungov.kxpt.entity.Exam">
+        <id column="id" property="id" />
+        <result column="exam_no" property="examNo" />
+        <result column="tea_no" property="teaNo" />
+        <result column="class_no" property="classNo" />
+        <result column="exam_time" property="examTime" />
+        <result column="exam_long" property="examLong" />
+        <result column="is_exam" property="isExam" />
+        <result column="is_delete" property="isDelete" />
+        <result column="status" property="status" />
+        <result column="ext1" property="ext1" />
+        <result column="ext2" property="ext2" />
+        <result column="ext3" property="ext3" />
+        <result column="revision" property="revision" />
+        <result column="created_by" property="createdBy" />
+        <result column="created_time" property="createdTime" />
+        <result column="updated_by" property="updatedBy" />
+        <result column="updated_time" property="updatedTime" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, exam_no, tea_no, class_no, exam_time, exam_long, is_exam, is_delete, status, ext1, ext2, ext3, revision, created_by, created_time, updated_by, updated_time
+    </sql>
+
+</mapper>
