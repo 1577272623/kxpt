@@ -59,6 +59,7 @@ public class StudentController extends BaseController<StudentService,Student> {
     @ApiOperation(value = "通过id获取Student")
     public Student getStudentById(@PathVariable Long id) {
         Student student=service.getById(id);
+
         return student;
     }
 

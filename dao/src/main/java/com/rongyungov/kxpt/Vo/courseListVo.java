@@ -27,7 +27,7 @@ public class courseListVo {
         this.sort = sort;
     }
 
-    private List<CourseList> children = new ArrayList<>();
+    private List<Object> children = new ArrayList<>();
 
 
     public String getName() {
@@ -54,11 +54,11 @@ public class courseListVo {
         this.msg = msg;
     }
 
-    public List<CourseList> getChildren() {
+    public List<Object> getChildren() {
         return children;
     }
 
-    public void setChildren(List<CourseList> children) {
+    public void setChildren(List<Object> children) {
         this.children = children;
     }
 }
