@@ -71,7 +71,6 @@ public class LoginAop {
         User userDtoTemp = new User();
         String account = "";
         String re_token = user.getAccount();
-
         //管理员 将 登录账户 转换为 学号  或者教师号
         if(user.getUserTypeCode().equalsIgnoreCase(KxptConstant.USER_TYPE_USER)){
             // 账户 默认  用户类型 管理员
@@ -146,7 +145,9 @@ public class LoginAop {
 
         if (userDtoTemp == null) {
             throw new CustomUnauthorizedException("该帐号不存在");
-        } else if (!userDtoTemp.getPassword().equalsIgnoreCase(user.getPassword())) {
+        } else if (!userDtoTemp.getIsAccessLogin().equalsIgnoreCase("1")){
+            throw new CustomUnauthorizedException("该账号不可用");
+        }else if (!userDtoTemp.getPassword().equalsIgnoreCase(user.getPassword())) {
             throw new CustomUnauthorizedException("输入账号密码错误");
         } else {
             if (JedisUtil.exists("shiro:login:" + re_token)) {

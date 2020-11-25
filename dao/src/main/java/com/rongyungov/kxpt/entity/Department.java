@@ -1,6 +1,7 @@
 package com.rongyungov.kxpt.entity;
 
 import com.baomidou.mybatisplus.annotation.*;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModelProperty;
 
 import java.io.Serializable;
@@ -82,7 +83,7 @@ public class Department extends BaseEntity  implements Serializable {
 	/**
 	 * 是否使用
 	 */
-	@ApiModelProperty("是否使用")
+	@ApiModelProperty("是否使用 1启用 0不启用 默认启用")
 	@TableField("is_use")
 
 	private String isUse;
@@ -140,7 +141,7 @@ public class Department extends BaseEntity  implements Serializable {
 	 */
 	@ApiModelProperty("创建时间")
 	@TableField("created_time")
-
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
 	private LocalDateTime createdTime;
 
 	/**
@@ -156,7 +157,7 @@ public class Department extends BaseEntity  implements Serializable {
 	 */
 	@ApiModelProperty("更新时间")
 	@TableField("updated_time")
-
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
 	private LocalDateTime updatedTime;
 
 	@TableField(exist = false)

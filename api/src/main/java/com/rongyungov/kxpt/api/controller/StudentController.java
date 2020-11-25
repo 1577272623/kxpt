@@ -1,21 +1,26 @@
 package com.rongyungov.kxpt.api.controller;
 
-import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.rongyungov.framework.entity.UserRole;
 import com.rongyungov.framework.shiro.util.AesCipherUtil;
-import com.rongyungov.kxpt.entity.SysUser;
+import com.rongyungov.framework.shiro.util.JwtUtil;
+import com.rongyungov.kxpt.entity.DepTask;
+import com.rongyungov.kxpt.entity.Task;
+import com.rongyungov.kxpt.service.DepTaskService;
+import com.rongyungov.kxpt.service.TaskService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import java.util.ArrayList;
 import java.util.List;
                 import  com.rongyungov.framework.base.BaseController;
     import com.rongyungov.kxpt.service.StudentService;
 import  com.rongyungov.kxpt.entity.Student;
+
+import javax.servlet.http.HttpServletRequest;
 
 /**
  *code is far away from bug with the animal protecting
@@ -28,6 +33,15 @@ import  com.rongyungov.kxpt.entity.Student;
 @Api(value="/student", description="Student 控制器")
 @RequestMapping("/student")
 public class StudentController extends BaseController<StudentService,Student> {
+
+    @Autowired
+    HttpServletRequest request;
+
+    @Autowired
+    DepTaskService depTaskService;
+
+    @Autowired
+    TaskService taskService;
 
     /**
      * @description : 获取分页列表
@@ -126,8 +140,22 @@ public class StudentController extends BaseController<StudentService,Student> {
 	    if (student1 != null ){
             throw new RuntimeException("学号已存在,不可重复");
         }
+        String account = JwtUtil.getClaim(request.getHeader("Token"), "account");
+        student.setCreatedBy(account);
         student.setPassword(AesCipherUtil.encrypt(student.getNo() + student.getPassword()));
         Boolean success = ((StudentService)this.service).save(student);
         return success;
+
 	}
+
+	@PostMapping("/task")
+    @ApiOperation(value = "获取任务列表")
+    public List<Task> task(@RequestBody Student  student){
+        List<DepTask> deptaskList = depTaskService.list(new QueryWrapper<DepTask>().eq("depart_id",student.getClassno()));
+        List<String>  ids=new ArrayList<>();
+        for (DepTask depTask:deptaskList)
+            ids.add(depTask.getDepartId());
+        List<Task> taskList = taskService.list(new QueryWrapper<Task>().eq("id",ids));
+	    return taskList;
+    }
 }

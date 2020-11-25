@@ -10,6 +10,7 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.springframework.web.bind.annotation.*;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -51,47 +52,19 @@ public class DepartmentController extends BaseController<DepartmentService,Depar
 
     @PostMapping("/menu")
     @ApiOperation(value = "获取分页数据信息")
-    public List<Object> getAllCourseListList(@ApiParam(name="courseList",value="筛选条件") @RequestBody(required = false) Department department) {
-        List<Object> routerTree = new ArrayList();
-        List<Object> children = new ArrayList<>();
+    public List<Department> getAllCourseListList(@ApiParam(name="courseList",value="筛选条件") @RequestBody(required = false) Department department) {
         QueryWrapper<Department> queryWrapper = new QueryWrapper(department);
         List<Department> departments = service.list(queryWrapper);
-
+        Map<String, List<Department>> groupBy = departments.stream().collect(Collectors.groupingBy(Department::getParentId));
+        List<Department> departmentListList = new ArrayList<>();
         //获取一级
-       /* Map<String, List<Department>> groupBy = departments.stream().collect(Collectors.groupingBy(Department::getParentId));
-        List<Department> departmentList = null;
-        for (Department department1 : groupBy.get(0)) {
-            department1.setChildrenList(groupBy.get(department1.getId()));
-            departmentList.add(department1);
+        for (Department department1 : groupBy.get("0")) {
+            List<Department> departments1 =groupBy.get(String.valueOf(department1.getId()));
+
+            department1.setChildrenList(departments1);
+            departmentListList.add(department1);
         }
-        return departmentList;
-    }*/
-
-        for (Department department1:departments){
-            //父级
-            if (department1.getType().equalsIgnoreCase("1")){
-                courseListVo courseListVo = new courseListVo(department1.getName(),
-                        "",1);
-                Integer id = Math.toIntExact(department1.getId());
-                for (Department department2:departments){
-                    //对应子级
-                    if (department2.getParentId().equalsIgnoreCase(id+"")){
-//                        List<CourseList> sortList = courseLists.stream().sorted((a, b) -> a.getId() - b.getId()).collect(Collectors.toList());
-                        children.add(department2);
-                        courseListVo.setChildren(children);
-                    }
-
-
-
-                }
-                //子级排序
-//                List<Object> children2 = children.stream().sorted((a, b) -> a.getSort() - b.getSort()).collect(Collectors.toList());
-                routerTree.add(courseListVo);
-            }
-        }
-        //父级排序
-//        List<courseListVo> routerTree2 = routerTree.stream().sorted((a, b) -> a.getSort() - b.getSort()).collect(Collectors.toList());
-        return routerTree;
+        return departmentListList;
     }
 
     /**

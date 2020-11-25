@@ -49,33 +49,24 @@ public class CourseListController extends BaseController<CourseListService,Cours
     @PostMapping("/listAll")
     @ApiOperation(value = "获取课程目录数据信息")
     public List<CourseList> getAllCourseListList(@ApiParam(name="courseList",value="筛选条件") @RequestBody(required = false) CourseList courseList) {
-        List<courseListVo> routerTree = new ArrayList();
-        List<CourseList> children = new ArrayList<>();
+
         QueryWrapper<CourseList> queryWrapper = new QueryWrapper(courseList);
         List<CourseList> courseLists = service.list(queryWrapper);
-        
            Map<String, List<CourseList>> groupBy = courseLists.stream().collect(Collectors.groupingBy(CourseList::getParentid));
-        List<CourseList> departmentList = null;
+        List<CourseList> courseListList = new ArrayList<>();
+        //获取一级
         for (CourseList department1 : groupBy.get("0")) {
-            department1.setChildrenList(groupBy.get(department1.getId()));
-            departmentList.add(department1);
+            List<CourseList> courseList1 =groupBy.get(String.valueOf(department1.getId()));
+            //子集排序
+            ArrayList<CourseList> courseLists_c = (ArrayList<CourseList>) courseList1;
+            courseLists_c.sort(Comparator.comparing(CourseList::getSort).reversed());
+            department1.setChildrenList(courseLists_c);
+            courseListList.add(department1);
         }
-//        return departmentList;
-        
-//        for (CourseList courseList1:courseLists){
-//            //父级
-//            if (courseList1.getParentid().equalsIgnoreCase("0")){
-//                courseListVo courseListVo = new courseListVo(courseList1.getName(),
-//                        courseList1.getPath(),courseList1.getSort());
-//                Long id = courseList1.getId();
-//
-//                //子级排序
-//                routerTree.add(courseListVo);
-//            }
-//        }
-//        //父级排序
-//        List<courseListVo> routerTree2 = routerTree.stream().sorted((a, b) -> a.getSort() - b.getSort()).collect(Collectors.toList());
-        return departmentList;
+        //父级排序
+        ArrayList<CourseList> demoArray = (ArrayList<CourseList>) courseListList;
+        demoArray.sort(Comparator.comparing(CourseList::getSort).reversed());
+        return demoArray;
     }
 
     /**

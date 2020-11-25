@@ -74,7 +74,7 @@ public class CourseList extends BaseEntity  implements Serializable {
 	/**
 	 * 排序
 	 */
-	@ApiModelProperty("排序")
+	@ApiModelProperty("排序 越大级别越高")
 	@TableField("sort")
 
 	private Integer sort;
@@ -87,7 +87,7 @@ public class CourseList extends BaseEntity  implements Serializable {
 	/**
 	 * 是否启用
 	 */
-	@ApiModelProperty("是否启用")
+	@ApiModelProperty("是否启用 1启用 0不启用 默认启用")
 	@TableField("is_use")
 
 	private String isUse;
