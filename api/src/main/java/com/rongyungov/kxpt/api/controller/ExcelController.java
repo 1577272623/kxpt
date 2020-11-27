@@ -1,6 +1,7 @@
 package com.rongyungov.kxpt.api.controller;
 
 
+import com.rongyungov.kxpt.entity.Test;
 import com.rongyungov.kxpt.utils.ExcelUtils;
 import io.swagger.annotations.Api;
 import org.apache.logging.log4j.LogManager;
@@ -40,10 +41,12 @@ public class ExcelController {
      */
     @PostMapping("/readExcel")
     public List<String[]> readExcel(@RequestBody MultipartFile file){
-//        String filePath = "c:\\kxpt\\upload\\excel\\Book1.xlsx";
-        List<String[]> mapList = ExcelUtils.readExcel(String.valueOf(file), 0);
+        String filePath = "c:\\kxpt\\upload\\excel\\Book1.xlsx";
+        List<String[]> mapList = ExcelUtils.readExcel(String.valueOf(filePath), 0);
 //        log.info("mapList:" + mapList);
 //        System.out.print(mapList);
         return mapList;
     }
+
+
 }

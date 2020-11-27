@@ -9,10 +9,16 @@ import com.rongyungov.kxpt.utils.ExcelUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.formula.functions.T;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
+
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -126,6 +132,7 @@ public class TestController extends BaseController<TestService,Test> {
         Boolean success=service.save(test);
         return success;
 	}
+
     /**
      * 试题上传
      */
@@ -133,54 +140,58 @@ public class TestController extends BaseController<TestService,Test> {
     @ApiOperation(value = "试题导入")
     @Transactional
     public Result testImport(MultipartFile excel) throws Exception {
+        String keno = "1";
+        //模拟数据
+        InputStream in = excel.getInputStream();
+        XSSFWorkbook work = new XSSFWorkbook(in);
         int fail = 0, success = 0;
         StringBuffer sb = new StringBuffer();
-
-        List<String[]> mapList = ExcelUtils.readExcel(String.valueOf(excel), 0);
-        for (int i = 0; i < mapList.size(); i++) {
+        XSSFSheet Sheet1 = work.getSheet("Sheet1");
+        for (int i = 1; i < Sheet1.getLastRowNum()+1; i++) {
             try {
                 success++;
                 Test test1 = new Test();
-                String[] test2 = mapList.get(i);
-                if (test2[0].equalsIgnoreCase("判断题") || test2[0].equalsIgnoreCase("填空题")) {
-                    if (test2[0].equalsIgnoreCase("判断题")) {
-                        test1.setStType("1");
-                    } else {
-                        test1.setStType("4");
-                    }
-                    test1.setStContent(test2[1]);
-                    test1.setStAnswer(test2[6]);
-                    if (!(test2[7] == null)) {
-                        test1.setAnalysis(test2[7]);
-                    }
-                    service.save(test1);
-                } else if (test2[0].equalsIgnoreCase("单选题") || test2[0].equalsIgnoreCase("多选题")) {
-                    if (test2[0].equalsIgnoreCase("单选题")) {
-                        test1.setStType("2");
-                    } else {
-                        test1.setStType("3");
-                    }
-                    test1.setStContent(test2[1]);
-                    test1.setAnswerA(test2[2]);
-                    test1.setAnswerB(test2[3]);
-                    test1.setAnswerC(test2[4]);
-                    test1.setAnswerD(test2[5]);
-                    test1.setStAnswer(test2[6]);
-                    if (!(test2[7] == null)) {
-                        test1.setAnalysis(test2[7]);
-                    }
-                    service.save(test1);
+                test1.setKeno(keno);
+                XSSFRow row = Sheet1.getRow(i);
+                    if (String.valueOf(row.getCell(0)).equalsIgnoreCase("判断题") || String.valueOf(row.getCell(0)).equalsIgnoreCase("填空题")) {
+                        if (String.valueOf(row.getCell(0)).equalsIgnoreCase("判断题")) {
+                            test1.setStType("1");
+                        } else {
+                            test1.setStType("4");
+                        }
+                        test1.setStContent(String.valueOf(row.getCell(1)));
+                        test1.setStAnswer(String.valueOf(row.getCell(6)));
+                        if (!(row.getCell(0) == null)) {
+                            test1.setAnalysis(String.valueOf(row.getCell(7)));
+                        }
+                        service.save(test1);
+                    } else if (String.valueOf(row.getCell(0)).equalsIgnoreCase("单选题") || String.valueOf(row.getCell(0)).equalsIgnoreCase("多选题")) {
+                        if (String.valueOf(row.getCell(0)).equalsIgnoreCase("单选题")) {
+                            test1.setStType("2");
+                        } else {
+                            test1.setStType("3");
+                        }
+                        test1.setStContent(String.valueOf(row.getCell(0)));
+                        test1.setAnswerA(String.valueOf(row.getCell(2)));
+                        test1.setAnswerB(String.valueOf(row.getCell(3)));
+                        test1.setAnswerC(String.valueOf(row.getCell(4)));
+                        test1.setAnswerD(String.valueOf(row.getCell(5)));
+                        test1.setStAnswer(String.valueOf(row.getCell(6)));
+                        if (!(row.getCell(7) == null)) {
+                            test1.setAnalysis(String.valueOf(row.getCell(7)));
+                        }
+                        service.save(test1);
                 }
-            } catch (Exception e) {
-                fail++;
+                } catch(Exception e){
+                    fail++;
 //                sb.append("<br>试题：" + test1 + "，&nbsp;&nbsp;");
 //                sb.append("失败原因：");
-                sb.append(e.getMessage() + "");
+                    sb.append(e.getMessage() + "");
+                }
             }
-        }
         Map<String, Object> map = new HashMap<>();
         StringBuffer stringBuffer = new StringBuffer();
-        stringBuffer.append("成功导入" + (success - fail) + "条记录 ， 失败：" + fail + "条记录<br>");
+        stringBuffer.append("成功导入" + (success - fail) + "条记录， 失败：" + fail + "条记录<br>");
         if (fail > 0) {
             stringBuffer.append("失败的信息为：");
             map.put("fail", fail);
@@ -190,7 +201,6 @@ public class TestController extends BaseController<TestService,Test> {
         stringBuffer.append(sb.toString());
         String msg = stringBuffer.toString();
         map.put("msg", msg);
-
         return Result.ok(map);
     }
 
