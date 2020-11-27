@@ -3,27 +3,23 @@ package com.rongyungov.kxpt.entity;
 import com.baomidou.mybatisplus.annotation.*;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModelProperty;
-import lombok.Data;
+
 import java.io.Serializable;
-import lombok.experimental.Accessors;
-import org.springframework.format.annotation.DateTimeFormat;
 
-import  java.math.BigDecimal;
-
-import  com.baomidou.mybatisplus.extension.activerecord.Model;
+import java.util.List;
 
 import  java.time.LocalDateTime;
 import  com.rongyungov.framework.base.BaseEntity;
 
 /**
  *code is far away from bug with the animal protecting
- *   @description : Exam 实体类
+ *   @description : Department 实体类
  *   ---------------------------------
  * 	 @author li
  *   @since 2020-11-24
  */
-@TableName("exam")
-public class Exam extends BaseEntity  implements Serializable {
+@TableName("department")
+public class Department extends BaseEntity  implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	/**
@@ -37,76 +33,60 @@ public class Exam extends BaseEntity  implements Serializable {
 	private Long id;
 
 	/**
-	 * 考试编号
+	 * 部门名称
 	 */
-	@ApiModelProperty("考试编号")
-	@TableField("exam_no")
+	@ApiModelProperty("部门名称")
+	@TableField("name")
 
-	private String examNo;
+	private String name;
 
 	/**
-	 * 案例类型
+	 * 部门属性 1院系 2班级
 	 */
-	@ApiModelProperty("案例类型")
+	@ApiModelProperty("部门属性 1院系 2班级")
 	@TableField("type")
 
 	private String type;
 
 	/**
-	 * 组卷模式
+	 * 上级部门
 	 */
-	@ApiModelProperty("组卷模式")
-	@TableField("mode")
+	@ApiModelProperty("上级部门")
+	@TableField("parent_id")
 
-	private String mode;
+	private String parentId;
 
 	/**
-	 * 教师编号
+	 * 描述
 	 */
-	@ApiModelProperty("教师编号")
-	@TableField("tea_no")
+	@ApiModelProperty("描述")
+	@TableField("description")
 
-	private String teaNo;
+	private String description;
 
 	/**
-	 * 班级编号
+	 * 人数
 	 */
-	@ApiModelProperty("班级编号")
-	@TableField("class_no")
+	@ApiModelProperty("人数")
+	@TableField("num")
 
-	private String classNo;
+	private Integer num;
 
 	/**
-	 * 开始时间
+	 * 班级
 	 */
-	@ApiModelProperty("开始时间")
-	@TableField("start_time")
-	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-	private LocalDateTime startTime;
+	@ApiModelProperty("班级")
+	@TableField("class_name")
+
+	private String className;
 
 	/**
-	 * 结束时间
+	 * 是否使用
 	 */
-	@ApiModelProperty("结束时间")
-	@TableField("over_time")
-	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-	private LocalDateTime overTime;
+	@ApiModelProperty("是否使用 1启用 0不启用 默认启用")
+	@TableField("is_use")
 
-	/**
-	 * 考试时长（小时）
-	 */
-	@ApiModelProperty("考试时长（小时）")
-	@TableField("exam_long")
-
-	private BigDecimal examLong;
-
-	/**
-	 * 是否开启
-	 */
-	@ApiModelProperty("是否开启 1开启 0关闭 默认开启")
-	@TableField("is_exam")
-
-	private String isExam;
+	private String isUse;
 
 	/**
 	 * 是否删除
@@ -117,28 +97,20 @@ public class Exam extends BaseEntity  implements Serializable {
 	private String isDelete;
 
 	/**
-	 * 考试状态
-	 */
-	@ApiModelProperty("考试状态 ")
-	@TableField("status")
-
-	private String status;
-
-	/**
-	 * 备用字段1
-	 */
-	@ApiModelProperty("备用字段1 名称")
-	@TableField("ext1")
-
-	private String ext1;
-
-	/**
 	 * 备用字段2
 	 */
 	@ApiModelProperty("备用字段2")
 	@TableField("ext2")
 
 	private String ext2;
+
+	/**
+	 * 备用字段1
+	 */
+	@ApiModelProperty("备用字段1")
+	@TableField("ext1")
+
+	private String ext1;
 
 	/**
 	 * 备用字段3
@@ -185,10 +157,19 @@ public class Exam extends BaseEntity  implements Serializable {
 	 */
 	@ApiModelProperty("更新时间")
 	@TableField("updated_time")
-
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
 	private LocalDateTime updatedTime;
 
+	@TableField(exist = false)
+	private  List<Department> childrenList;
 
+	public List<Department> getChildrenList() {
+		return childrenList;
+	}
+
+	public void setChildrenList(List<Department> childrenList) {
+		this.childrenList = childrenList;
+	}
 
 	public Long getId() {
 		return id;
@@ -200,13 +181,13 @@ public class Exam extends BaseEntity  implements Serializable {
 	}
 
 
-	public String getExamNo() {
-		return examNo;
+	public String getName() {
+		return name;
 	}
 
 
-	public void setExamNo(String examNo) {
-		this.examNo = examNo;
+	public void setName(String name) {
+		this.name = name;
 	}
 
 
@@ -220,73 +201,53 @@ public class Exam extends BaseEntity  implements Serializable {
 	}
 
 
-	public String getMode() {
-		return mode;
+	public String getParentId() {
+		return parentId;
 	}
 
 
-	public void setMode(String mode) {
-		this.mode = mode;
+	public void setParentId(String parentId) {
+		this.parentId = parentId;
 	}
 
 
-	public String getTeaNo() {
-		return teaNo;
+	public String getDescription() {
+		return description;
 	}
 
 
-	public void setTeaNo(String teaNo) {
-		this.teaNo = teaNo;
+	public void setDescription(String description) {
+		this.description = description;
 	}
 
 
-	public String getClassNo() {
-		return classNo;
+	public Integer getNum() {
+		return num;
 	}
 
 
-	public void setClassNo(String classNo) {
-		this.classNo = classNo;
+	public void setNum(Integer num) {
+		this.num = num;
 	}
 
 
-	public LocalDateTime getStartTime() {
-		return startTime;
+	public String getClassName() {
+		return className;
 	}
 
 
-	public void setStartTime(LocalDateTime startTime) {
-		this.startTime = startTime;
+	public void setClassName(String className) {
+		this.className = className;
 	}
 
 
-	public LocalDateTime getOverTime() {
-		return overTime;
+	public String getIsUse() {
+		return isUse;
 	}
 
 
-	public void setOverTime(LocalDateTime overTime) {
-		this.overTime = overTime;
-	}
-
-
-	public BigDecimal getExamLong() {
-		return examLong;
-	}
-
-
-	public void setExamLong(BigDecimal examLong) {
-		this.examLong = examLong;
-	}
-
-
-	public String getIsExam() {
-		return isExam;
-	}
-
-
-	public void setIsExam(String isExam) {
-		this.isExam = isExam;
+	public void setIsUse(String isUse) {
+		this.isUse = isUse;
 	}
 
 
@@ -300,13 +261,13 @@ public class Exam extends BaseEntity  implements Serializable {
 	}
 
 
-	public String getStatus() {
-		return status;
+	public String getExt2() {
+		return ext2;
 	}
 
 
-	public void setStatus(String status) {
-		this.status = status;
+	public void setExt2(String ext2) {
+		this.ext2 = ext2;
 	}
 
 
@@ -317,16 +278,6 @@ public class Exam extends BaseEntity  implements Serializable {
 
 	public void setExt1(String ext1) {
 		this.ext1 = ext1;
-	}
-
-
-	public String getExt2() {
-		return ext2;
-	}
-
-
-	public void setExt2(String ext2) {
-		this.ext2 = ext2;
 	}
 
 
@@ -392,21 +343,18 @@ public class Exam extends BaseEntity  implements Serializable {
 
 	@Override
 	public String toString() {
-		return "Exam{" +
+		return "Department{" +
 				"id=" + id +
-				", examNo=" + examNo +
+				", name=" + name +
 				", type=" + type +
-				", mode=" + mode +
-				", teaNo=" + teaNo +
-				", classNo=" + classNo +
-				", startTime=" + startTime +
-				", overTime=" + overTime +
-				", examLong=" + examLong +
-				", isExam=" + isExam +
+				", parentId=" + parentId +
+				", description=" + description +
+				", num=" + num +
+				", className=" + className +
+				", isUse=" + isUse +
 				", isDelete=" + isDelete +
-				", status=" + status +
-				", ext1=" + ext1 +
 				", ext2=" + ext2 +
+				", ext1=" + ext1 +
 				", ext3=" + ext3 +
 				", revision=" + revision +
 				", createdBy=" + createdBy +

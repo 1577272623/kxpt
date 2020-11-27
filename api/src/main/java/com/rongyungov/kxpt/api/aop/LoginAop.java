@@ -60,8 +60,71 @@ public class LoginAop {
 //        Result res = (Result) joinPoint.proceed(); //调用目标方法
         //pointcut是对应的注解类   rvt就是方法运行完之后要返回的值
         User userDtoTemp = new User();
+<<<<<<< Updated upstream
 
         String account = user.getAccount();
+=======
+        String account = "";
+        String re_token = user.getAccount();
+        //管理员 将 登录账户 转换为 学号  或者教师号
+        if(user.getUserTypeCode().equalsIgnoreCase(KxptConstant.USER_TYPE_USER)){
+            // 账户 默认  用户类型 管理员
+            account = user.getAccount();
+            userDtoTemp.setUserTypeCode(KxptConstant.USER_TYPE_USER);
+        }else if(user.getUserTypeCode().equalsIgnoreCase(KxptConstant.USER_TYPE_TEACHER)){
+            //教师
+            // 账户 默认教师编号  用户类型 教师
+            if (CheckUtils.isPhoneLegal(user.getAccount())){
+                Teacher teacher = new Teacher();
+                teacher.setTel(user.getAccount());
+                Teacher findTeacher =teacherService.getOne(new QueryWrapper<>(teacher));
+                //没有查询出对应的用户
+                re_token = findTeacher.getTeano();
+                if(findTeacher == null){
+                    throw new CustomUnauthorizedException("该帐号不存在");
+                }
+                //将手机号 与 登录密码分离D
+                String password = AesCipherUtil.desEncrypt(user.getPassword()).replace(user.getAccount(),"");
+                //将老师的编号  与 分离密码 加密
+                String newpassword = AesCipherUtil.encrypt(findTeacher.getTeano()+password);
+                //替换登录的 密码
+                user.setPassword(newpassword);
+
+                account = findTeacher.getTeano();
+            }else{
+                account = user.getAccount();
+            }
+            userDtoTemp.setUserTypeCode(KxptConstant.USER_TYPE_TEACHER);
+        }else{
+            //学员
+            if (CheckUtils.isPhoneLegal(user.getAccount())){
+                Student student = new Student();
+                student.setTel(user.getAccount());
+                Student findStudent =studentService.getOne(new QueryWrapper<>(student));
+                //没有查询出对应的用户
+                re_token = findStudent.getNo();
+                if(findStudent == null){
+                    throw new CustomUnauthorizedException("该帐号不存在");
+                }
+                //将手机号 与 登录密码分离D
+                String password = AesCipherUtil.desEncrypt(user.getPassword()).replace(user.getAccount(),"");
+                //将学生的编号  与 分离密码 加密
+                String newpassword = AesCipherUtil.encrypt(findStudent.getNo()+password);
+                //替换登录的 密码
+                user.setPassword(newpassword);
+
+                account = findStudent.getNo();
+            }else{
+//                String password = AesCipherUtil.desEncrypt(user.getPassword()).replace(user.getAccount(),"");
+
+                account = user.getAccount();
+            }
+            userDtoTemp.setUserTypeCode(KxptConstant.USER_TYPE_STUDENT);
+            }
+        userDtoTemp.setAccount(account);
+        QueryWrapper<User> queryWrapper = new QueryWrapper(userDtoTemp);
+        userDtoTemp = userService.getOne(queryWrapper);
+>>>>>>> Stashed changes
 
 
         
@@ -79,7 +142,9 @@ public class LoginAop {
 
         if (userDtoTemp == null) {
             throw new CustomUnauthorizedException("该帐号不存在");
-        } else if (!userDtoTemp.getPassword().equalsIgnoreCase(user.getPassword())) {
+        } else if (!userDtoTemp.getIsAccessLogin().equalsIgnoreCase("1")){
+            throw new CustomUnauthorizedException("该账号不可用");
+        }else if (!userDtoTemp.getPassword().equalsIgnoreCase(user.getPassword())) {
             throw new CustomUnauthorizedException("输入账号密码错误");
         } else {
             if (JedisUtil.exists("shiro:login:" + user.getAccount())) {

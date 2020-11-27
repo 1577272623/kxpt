@@ -8,8 +8,6 @@ import java.io.Serializable;
 import lombok.experimental.Accessors;
 import org.springframework.format.annotation.DateTimeFormat;
 
-import  java.math.BigDecimal;
-
 import  com.baomidou.mybatisplus.extension.activerecord.Model;
 
 import  java.time.LocalDateTime;
@@ -17,13 +15,13 @@ import  com.rongyungov.framework.base.BaseEntity;
 
 /**
  *code is far away from bug with the animal protecting
- *   @description : Exam 实体类
+ *   @description : Grade 实体类
  *   ---------------------------------
  * 	 @author li
  *   @since 2020-11-24
  */
-@TableName("exam")
-public class Exam extends BaseEntity  implements Serializable {
+@TableName("grade")
+public class Grade extends BaseEntity  implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	/**
@@ -37,76 +35,36 @@ public class Exam extends BaseEntity  implements Serializable {
 	private Long id;
 
 	/**
-	 * 考试编号
+	 * 试卷名
 	 */
-	@ApiModelProperty("考试编号")
-	@TableField("exam_no")
+	@ApiModelProperty("试卷名")
+	@TableField("name")
 
-	private String examNo;
+	private String name;
 
 	/**
-	 * 案例类型
+	 * 所属部门
 	 */
-	@ApiModelProperty("案例类型")
-	@TableField("type")
+	@ApiModelProperty("所属部门")
+	@TableField("dapartment")
 
-	private String type;
+	private String dapartment;
 
 	/**
-	 * 组卷模式
+	 * 学生名
 	 */
-	@ApiModelProperty("组卷模式")
-	@TableField("mode")
+	@ApiModelProperty("学生名")
+	@TableField("student")
 
-	private String mode;
+	private String student;
 
 	/**
-	 * 教师编号
+	 * 成绩
 	 */
-	@ApiModelProperty("教师编号")
-	@TableField("tea_no")
+	@ApiModelProperty("成绩")
+	@TableField("grade")
 
-	private String teaNo;
-
-	/**
-	 * 班级编号
-	 */
-	@ApiModelProperty("班级编号")
-	@TableField("class_no")
-
-	private String classNo;
-
-	/**
-	 * 开始时间
-	 */
-	@ApiModelProperty("开始时间")
-	@TableField("start_time")
-	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-	private LocalDateTime startTime;
-
-	/**
-	 * 结束时间
-	 */
-	@ApiModelProperty("结束时间")
-	@TableField("over_time")
-	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-	private LocalDateTime overTime;
-
-	/**
-	 * 考试时长（小时）
-	 */
-	@ApiModelProperty("考试时长（小时）")
-	@TableField("exam_long")
-
-	private BigDecimal examLong;
-
-	/**
-	 * 是否开启
-	 */
-	@ApiModelProperty("是否开启 1开启 0关闭 默认开启")
-	@TableField("is_exam")
-
-	private String isExam;
+	private String grade;
 
 	/**
 	 * 是否删除
@@ -117,17 +75,17 @@ public class Exam extends BaseEntity  implements Serializable {
 	private String isDelete;
 
 	/**
-	 * 考试状态
+	 * 属性
 	 */
-	@ApiModelProperty("考试状态 ")
-	@TableField("status")
+	@ApiModelProperty("属性")
+	@TableField("type")
 
-	private String status;
+	private String type;
 
 	/**
 	 * 备用字段1
 	 */
-	@ApiModelProperty("备用字段1 名称")
+	@ApiModelProperty("备用字段1")
 	@TableField("ext1")
 
 	private String ext1;
@@ -169,7 +127,7 @@ public class Exam extends BaseEntity  implements Serializable {
 	 */
 	@ApiModelProperty("创建时间")
 	@TableField("created_time")
-	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+
 	private LocalDateTime createdTime;
 
 	/**
@@ -200,93 +158,43 @@ public class Exam extends BaseEntity  implements Serializable {
 	}
 
 
-	public String getExamNo() {
-		return examNo;
+	public String getName() {
+		return name;
 	}
 
 
-	public void setExamNo(String examNo) {
-		this.examNo = examNo;
+	public void setName(String name) {
+		this.name = name;
 	}
 
 
-	public String getType() {
-		return type;
+	public String getDapartment() {
+		return dapartment;
 	}
 
 
-	public void setType(String type) {
-		this.type = type;
+	public void setDapartment(String dapartment) {
+		this.dapartment = dapartment;
 	}
 
 
-	public String getMode() {
-		return mode;
+	public String getStudent() {
+		return student;
 	}
 
 
-	public void setMode(String mode) {
-		this.mode = mode;
+	public void setStudent(String student) {
+		this.student = student;
 	}
 
 
-	public String getTeaNo() {
-		return teaNo;
+	public String getGrade() {
+		return grade;
 	}
 
 
-	public void setTeaNo(String teaNo) {
-		this.teaNo = teaNo;
-	}
-
-
-	public String getClassNo() {
-		return classNo;
-	}
-
-
-	public void setClassNo(String classNo) {
-		this.classNo = classNo;
-	}
-
-
-	public LocalDateTime getStartTime() {
-		return startTime;
-	}
-
-
-	public void setStartTime(LocalDateTime startTime) {
-		this.startTime = startTime;
-	}
-
-
-	public LocalDateTime getOverTime() {
-		return overTime;
-	}
-
-
-	public void setOverTime(LocalDateTime overTime) {
-		this.overTime = overTime;
-	}
-
-
-	public BigDecimal getExamLong() {
-		return examLong;
-	}
-
-
-	public void setExamLong(BigDecimal examLong) {
-		this.examLong = examLong;
-	}
-
-
-	public String getIsExam() {
-		return isExam;
-	}
-
-
-	public void setIsExam(String isExam) {
-		this.isExam = isExam;
+	public void setGrade(String grade) {
+		this.grade = grade;
 	}
 
 
@@ -300,13 +208,13 @@ public class Exam extends BaseEntity  implements Serializable {
 	}
 
 
-	public String getStatus() {
-		return status;
+	public String getType() {
+		return type;
 	}
 
 
-	public void setStatus(String status) {
-		this.status = status;
+	public void setType(String type) {
+		this.type = type;
 	}
 
 
@@ -392,19 +300,14 @@ public class Exam extends BaseEntity  implements Serializable {
 
 	@Override
 	public String toString() {
-		return "Exam{" +
+		return "Grade{" +
 				"id=" + id +
-				", examNo=" + examNo +
-				", type=" + type +
-				", mode=" + mode +
-				", teaNo=" + teaNo +
-				", classNo=" + classNo +
-				", startTime=" + startTime +
-				", overTime=" + overTime +
-				", examLong=" + examLong +
-				", isExam=" + isExam +
+				", name=" + name +
+				", dapartment=" + dapartment +
+				", student=" + student +
+				", grade=" + grade +
 				", isDelete=" + isDelete +
-				", status=" + status +
+				", type=" + type +
 				", ext1=" + ext1 +
 				", ext2=" + ext2 +
 				", ext3=" + ext3 +
