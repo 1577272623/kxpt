@@ -4,12 +4,12 @@ public class GenUtils {
     public static void main(String[] args) {
 
 
-        MybatisGen2.gen("D:/temp",
+        MybatisGen2.gen("D:/tTest",
                 "li",
                 "com.rongyungov.kxpt",
                 /*new String[]{"arrage_schedule","arrage_schedule_detail","car","car_oil","car_repair",
                         "classes","coach","coach_car","dictionary","menu","reservation","role",
-                        "role_menu","student","time_space","time_template","sys_user","user_role"
+                        "role_menu","student","time_space","time_tTestlate","sys_user","user_role"
                 }*/
                 new String[]{"student","teacher","sys_user","user_role","course_data","course_list",
                 "test","exam","menu","role_menu","dictionary","role","role_menu","department","grade",

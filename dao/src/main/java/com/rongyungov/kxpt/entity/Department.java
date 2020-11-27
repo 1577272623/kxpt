@@ -161,14 +161,14 @@ public class Department extends BaseEntity  implements Serializable {
 	private LocalDateTime updatedTime;
 
 	@TableField(exist = false)
-	private  List<Department> childrenList;
+	private  List<Department> children;
 
-	public List<Department> getChildrenList() {
-		return childrenList;
+	public List<Department> getChildren() {
+		return children;
 	}
 
-	public void setChildrenList(List<Department> childrenList) {
-		this.childrenList = childrenList;
+	public void setChildren(List<Department> children) {
+		this.children = children;
 	}
 
 	public Long getId() {

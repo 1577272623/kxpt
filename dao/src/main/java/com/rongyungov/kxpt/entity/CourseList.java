@@ -165,14 +165,14 @@ public class CourseList extends BaseEntity  implements Serializable {
 	private LocalDateTime updatedTime;
 
 	@TableField(exist = false)
-	private List<CourseList> childrenList;
+	private List<CourseList> children;
 
-	public List<CourseList> getChildrenList() {
-		return childrenList;
+	public List<CourseList> getChildren() {
+		return children;
 	}
 
-	public void setChildrenList(List<CourseList> childrenList) {
-		this.childrenList = childrenList;
+	public void setChildren(List<CourseList> children) {
+		this.children = children;
 	}
 
 	public Long getId() {

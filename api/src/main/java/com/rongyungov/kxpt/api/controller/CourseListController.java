@@ -49,7 +49,6 @@ public class CourseListController extends BaseController<CourseListService,Cours
     @PostMapping("/listAll")
     @ApiOperation(value = "获取课程目录数据信息")
     public List<CourseList> getAllCourseListList(@ApiParam(name="courseList",value="筛选条件") @RequestBody(required = false) CourseList courseList) {
-
         QueryWrapper<CourseList> queryWrapper = new QueryWrapper(courseList);
         List<CourseList> courseLists = service.list(queryWrapper);
            Map<String, List<CourseList>> groupBy = courseLists.stream().collect(Collectors.groupingBy(CourseList::getParentid));
@@ -57,10 +56,12 @@ public class CourseListController extends BaseController<CourseListService,Cours
         //获取一级
         for (CourseList department1 : groupBy.get("0")) {
             List<CourseList> courseList1 =groupBy.get(String.valueOf(department1.getId()));
-            //子集排序
-            ArrayList<CourseList> courseLists_c = (ArrayList<CourseList>) courseList1;
-            courseLists_c.sort(Comparator.comparing(CourseList::getSort).reversed());
-            department1.setChildrenList(courseLists_c);
+            if (!(courseList1==null)) {
+                //子集排序
+                ArrayList<CourseList> courseLists_c = (ArrayList<CourseList>) courseList1;
+                courseLists_c.sort(Comparator.comparing(CourseList::getSort).reversed());
+                department1.setChildren(courseLists_c);
+            }
             courseListList.add(department1);
         }
         //父级排序
@@ -91,7 +92,15 @@ public class CourseListController extends BaseController<CourseListService,Cours
     @DeleteMapping("/delete/{id}")
     @ApiOperation(value = "通过id删除CourseList")
     public Boolean delete(@PathVariable Long id) {
-        Boolean success=service.removeById(id);
+
+        List<CourseList> courseLists = service.list(new QueryWrapper<CourseList>().eq("parentid",id));
+        List<Long> ids=new ArrayList<>();
+        ids.add(id);
+        if (!(courseLists ==null)){
+            for (CourseList courseList:courseLists)
+                ids.add(courseList.getId());
+        }
+        Boolean success= service.removeByIds(ids);
         return success;
     }
 
