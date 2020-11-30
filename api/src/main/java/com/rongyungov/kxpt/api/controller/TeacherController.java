@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.rongyungov.framework.entity.User;
 import com.rongyungov.framework.shiro.util.AesCipherUtil;
 import com.rongyungov.kxpt.entity.Student;
+import com.rongyungov.kxpt.entity.SysUser;
 import com.rongyungov.kxpt.service.StudentService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -41,10 +42,11 @@ public class TeacherController extends BaseController<TeacherService,Teacher> {
     public IPage<Teacher> getTeacherList( @ApiParam(name="teacher",value="筛选条件") @RequestBody(required = false) Teacher teacher  ,
                                 @ApiParam(name="pageIndex",value="页数",required=true,defaultValue = "1")@RequestParam Integer pageIndex ,
                                 @ApiParam(name="pageSize",value="页大小",required=true,defaultValue = "10")@RequestParam Integer pageSize
-                                ) {
+                                ) throws InstantiationException, IllegalAccessException {
         Page<Teacher> page=new Page<Teacher>(pageIndex,pageSize);
-        QueryWrapper<Teacher> queryWrapper=new QueryWrapper<>(teacher);
-        return service.page(page,queryWrapper);
+        QueryWrapper<Teacher> queryWrapper=teacher.toWrapper(teacher);
+        IPage<Teacher> TeacherIPage = service.page(page,queryWrapper);
+        return TeacherIPage;
     }
 
     /**
@@ -121,7 +123,6 @@ public class TeacherController extends BaseController<TeacherService,Teacher> {
 	    teacher1.setTeano(teacher.getTeano());
         QueryWrapper<Teacher> queryWrapper = new QueryWrapper(teacher1);
         Teacher tt = service.getOne(queryWrapper);
-//        QueryWrapper<Teacher> teacher1 = new QueryWrapper<Teacher>().eq("teano", teacher.getTeano());
         if (tt !=null){
             throw new RuntimeException("教师已存在,不可重复");
         }

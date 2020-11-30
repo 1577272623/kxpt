@@ -11,110 +11,110 @@ import org.springframework.web.bind.annotation.*;
 import java.util.ArrayList;
 import java.util.List;
                 import  com.rongyungov.framework.base.BaseController;
-    import com.rongyungov.kxpt.service.ExamService;
-import  com.rongyungov.kxpt.entity.Exam;
+    import com.rongyungov.kxpt.service.GradeService;
+import  com.rongyungov.kxpt.entity.Grade;
 
 /**
  *code is far away from bug with the animal protecting
- *   @description : Exam 控制器
+ *   @description : Grade 控制器
  *   ---------------------------------
  * 	 @author li
- *   @since 2020-11-11
+ *   @since 2020-11-20
  */
 @RestController
-@Api(value="/exam", description="Exam 控制器")
-@RequestMapping("/exam")
-public class ExamController extends BaseController<ExamService,Exam> {
+@Api(value="/grade", description="Grade 控制器")
+@RequestMapping("/grade")
+public class GradeController extends BaseController<GradeService,Grade> {
 
     /**
      * @description : 获取分页列表
      * ---------------------------------
      * @author : li
-     * @since : Create in 2020-11-11
+     * @since : Create in 2020-11-20
      */
     @PostMapping("/list")
     @ApiOperation(value = "获取分页数据信息")
-    public IPage<Exam> getExamList( @ApiParam(name="exam",value="筛选条件") @RequestBody(required = false) Exam exam  ,
+    public IPage<Grade> getGradeList( @ApiParam(name="grade",value="筛选条件") @RequestBody(required = false) Grade grade  ,
                                 @ApiParam(name="pageIndex",value="页数",required=true,defaultValue = "1")@RequestParam Integer pageIndex ,
                                 @ApiParam(name="pageSize",value="页大小",required=true,defaultValue = "10")@RequestParam Integer pageSize
                                 ) throws InstantiationException, IllegalAccessException {
-        Page<Exam> page=new Page<Exam>(pageIndex,pageSize);
-        QueryWrapper<Exam> queryWrapper=exam.toWrapper(exam);
-        IPage<Exam> examIPage = service.page(page,queryWrapper);
-        return examIPage;
+        Page<Grade> page=new Page<Grade>(pageIndex,pageSize);
+        QueryWrapper<Grade> queryWrapper=grade.toWrapper(grade);
+        IPage<Grade> gradeIPage = service.page(page,queryWrapper);
+        return gradeIPage;
     }
 
     /**
-     * @description : 通过id获取Exam
+     * @description : 通过id获取Grade
      * ---------------------------------
      * @author : li
-     * @since : Create in 2020-11-11
+     * @since : Create in 2020-11-20
      */
     @GetMapping("/get/{id}")
-    @ApiOperation(value = "通过id获取Exam")
-    public Exam getExamById(@PathVariable Long id) {
-        Exam exam=service.getById(id);
-        return exam;
+    @ApiOperation(value = "通过id获取Grade")
+    public Grade getGradeById(@PathVariable Long id) {
+        Grade grade=service.getById(id);
+        return grade;
     }
 
     /**
-     * @description : 通过id删除Exam
+     * @description : 通过id删除Grade
      * ---------------------------------
      * @author : li
-     * @since : Create in 2020-11-11
+     * @since : Create in 2020-11-20
      */
     @DeleteMapping("/delete/{id}")
-    @ApiOperation(value = "通过id删除Exam")
+    @ApiOperation(value = "通过id删除Grade")
     public Boolean delete(@PathVariable Long id) {
         Boolean success=service.removeById(id);
         return success;
     }
 
     /**
-     * @description : 通过id删除Exam
+     * @description : 通过id删除Grade
      * ---------------------------------
      * @author : li
-     * @since : Create in 2020-11-11
+     * @since : Create in 2020-11-20
      */
     @PostMapping("/deletes")
-    @ApiOperation(value = "通过ids删除Exams")
-    public Boolean delete(@RequestBody(required = false) List<Exam> selectexams) {
+    @ApiOperation(value = "通过ids删除Grades")
+    public Boolean delete(@RequestBody(required = false) List<Grade> selectgrades) {
         Boolean success=false;
-        if(selectexams!=null&&selectexams.size()!=0)
+        if(selectgrades!=null&&selectgrades.size()!=0)
         {
             List<Long>  ids=new ArrayList<>();
-            for (Exam exam:selectexams)
-            ids.add(exam.getId());
+            for (Grade grade:selectgrades)
+            ids.add(grade.getId());
             success= service.removeByIds(ids);
         }
         return success;
     }
 
     /**
-     * @description : 通过id更新Exam
+     * @description : 通过id更新Grade
      * ---------------------------------
      * @author : li
-     * @since : Create in 2020-11-11
+     * @since : Create in 2020-11-20
      */
     @PutMapping("/update/{id}")
-    @ApiOperation(value="通过id更新Exam")
-    public Boolean update(@ApiParam(name="id",value="id主键值",required=true) @PathVariable Long id,@RequestBody Exam exam) {
+    @ApiOperation(value="通过id更新Grade")
+    public Boolean update(@ApiParam(name="id",value="id主键值",required=true) @PathVariable Long id,@RequestBody Grade grade) {
         if(id!=null)
-            exam.setId(id);
-        Boolean success=service.updateById(exam);
+            grade.setId(id);
+        Boolean success=service.updateById(grade);
         return success;
     }
 
     /**
-     * @description : 添加Exam
+     * @description : 添加Grade
      * ---------------------------------
      * @author : li
-     * @since : Create in 2020-11-11
+     * @since : Create in 2020-11-20
      */
 	@PostMapping("/add")
-    @ApiOperation(value="添加Exam")
-    public Boolean add(@RequestBody Exam  exam) {
-        Boolean success=service.save( exam);
+    @ApiOperation(value="添加Grade")
+    public Boolean add(@RequestBody Grade  grade) {
+        Boolean success=service.save( grade);
         return success;
 	}
 

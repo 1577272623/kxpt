@@ -14,8 +14,13 @@ import com.rongyungov.framework.shiro.util.AesCipherUtil;
 import com.rongyungov.framework.shiro.util.JwtUtil;
 import com.rongyungov.framework.shiro.util.common.JsonConvertUtil;
 import com.rongyungov.framework.sms_service.entity.Message;
+import com.rongyungov.kxpt.entity.Student;
+import com.rongyungov.kxpt.entity.Teacher;
+import com.rongyungov.kxpt.service.StudentService;
+import com.rongyungov.kxpt.service.TeacherService;
 import com.rongyungov.kxpt.utils.CheckUtils;
 import com.rongyungov.kxpt.utils.KxptConstant;
+import org.apache.poi.ss.formula.functions.T;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -42,7 +47,11 @@ public class LoginAop {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private TeacherService teacherService;
 
+    @Autowired
+    private StudentService studentService;
 
     @Autowired
     HttpServletRequest request;
@@ -59,18 +68,14 @@ public class LoginAop {
         User user = (User) joinPoint.getArgs()[0];
 //        Result res = (Result) joinPoint.proceed(); //调用目标方法
         //pointcut是对应的注解类   rvt就是方法运行完之后要返回的值
-        User userDtoTemp = new User();
-<<<<<<< Updated upstream
-
-        String account = user.getAccount();
-=======
+        User userDtoTTest = new User();
         String account = "";
         String re_token = user.getAccount();
         //管理员 将 登录账户 转换为 学号  或者教师号
         if(user.getUserTypeCode().equalsIgnoreCase(KxptConstant.USER_TYPE_USER)){
             // 账户 默认  用户类型 管理员
             account = user.getAccount();
-            userDtoTemp.setUserTypeCode(KxptConstant.USER_TYPE_USER);
+            userDtoTTest.setUserTypeCode(KxptConstant.USER_TYPE_USER);
         }else if(user.getUserTypeCode().equalsIgnoreCase(KxptConstant.USER_TYPE_TEACHER)){
             //教师
             // 账户 默认教师编号  用户类型 教师
@@ -94,7 +99,7 @@ public class LoginAop {
             }else{
                 account = user.getAccount();
             }
-            userDtoTemp.setUserTypeCode(KxptConstant.USER_TYPE_TEACHER);
+            userDtoTTest.setUserTypeCode(KxptConstant.USER_TYPE_TEACHER);
         }else{
             //学员
             if (CheckUtils.isPhoneLegal(user.getAccount())){
@@ -119,55 +124,54 @@ public class LoginAop {
 
                 account = user.getAccount();
             }
-            userDtoTemp.setUserTypeCode(KxptConstant.USER_TYPE_STUDENT);
+            userDtoTTest.setUserTypeCode(KxptConstant.USER_TYPE_STUDENT);
             }
-        userDtoTemp.setAccount(account);
-        QueryWrapper<User> queryWrapper = new QueryWrapper(userDtoTemp);
-        userDtoTemp = userService.getOne(queryWrapper);
->>>>>>> Stashed changes
+        userDtoTTest.setAccount(account);
+        QueryWrapper<User> queryWrapper = new QueryWrapper(userDtoTTest);
+        userDtoTTest = userService.getOne(queryWrapper);
 
 
-        
         //手机登录
-        if (CheckUtils.isPhoneLegal(account)){
-            userDtoTemp.setTelephone(account);
-        }else {
-            //学号登录
-            userDtoTemp.setAccount(account);
-        }
-        QueryWrapper<User> queryWrapper = new QueryWrapper(userDtoTemp);
-        userDtoTemp = userService.getOne(queryWrapper);
-//        user.setPassword(AesCipherUtil.encrypt(userDtoTemp.getAccount() + user.getPassword()));
+//        if (CheckUtils.isPhoneLegal(account)){
+//            userDtoTTest.setTelephone(account);
+//        }else {
+//            //学号登录
+//            userDtoTTest.setAccount(account);
+//        }
+//        QueryWrapper<User> queryWrapper = new QueryWrapper(userDtoTTest);
+//        userDtoTTest = userService.getOne(queryWrapper);
+//        user.setPassword(AesCipherUtil.encrypt(userDtoTTest.getPassword()));
 
 
-        if (userDtoTemp == null) {
+        if (userDtoTTest == null) {
             throw new CustomUnauthorizedException("该帐号不存在");
-        } else if (!userDtoTemp.getIsAccessLogin().equalsIgnoreCase("1")){
+        } else if (!userDtoTTest.getIsAccessLogin().equalsIgnoreCase("1")){
             throw new CustomUnauthorizedException("该账号不可用");
-        }else if (!userDtoTemp.getPassword().equalsIgnoreCase(user.getPassword())) {
+        }else if (!userDtoTTest.getPassword().equalsIgnoreCase(user.getPassword())) {
             throw new CustomUnauthorizedException("输入账号密码错误");
         } else {
-            if (JedisUtil.exists("shiro:login:" + user.getAccount())) {
-                JedisUtil.delKey("shiro:login:" + user.getAccount());
+            if (JedisUtil.exists("shiro:login:" + re_token)) {
+                JedisUtil.delKey("shiro:login:" + re_token);
             }
             String currentTimeMillis = "";
-            if (JedisUtil.exists("shiro:refresh_token:" + user.getAccount())) {
-                currentTimeMillis = (String)JedisUtil.getObject("shiro:refresh_token:" + user.getAccount());
+
+            if (JedisUtil.exists("shiro:refresh_token:" + re_token)) {
+                currentTimeMillis = (String)JedisUtil.getObject("shiro:refresh_token:" + re_token);
             } else {
                 currentTimeMillis = String.valueOf(System.currentTimeMillis());
-                JedisUtil.setObject("shiro:refresh_token:" + user.getAccount(), currentTimeMillis, Integer.parseInt(this.refreshTokenExpireTime));
+                JedisUtil.setObject("shiro:refresh_token:" + re_token, currentTimeMillis, Integer.parseInt(this.refreshTokenExpireTime));
             }
-            String token = JwtUtil.sign(userDtoTemp, currentTimeMillis);
-            BaseapiApplication.saveLoginUserIdsAndCompanyIds(userDtoTemp.getAccount(), userDtoTemp.getId(), userDtoTemp.getCompanyId());
-            JedisUtil.setObject("shiro:login:" + user.getAccount(), userDtoTemp);
+            String token = JwtUtil.sign(userDtoTTest, currentTimeMillis);
+            BaseapiApplication.saveLoginUserIdsAndCompanyIds(userDtoTTest.getAccount(), userDtoTTest.getId(), userDtoTTest.getCompanyId());
+            JedisUtil.setObject("shiro:login:" + re_token, userDtoTTest);
 
             reMap.put("token",token);
 
             //教师
-            if(userDtoTemp.getUserTypeCode().equalsIgnoreCase(KxptConstant.USER_TYPE_TEACHER)){
+            if(userDtoTTest.getUserTypeCode().equalsIgnoreCase(KxptConstant.USER_TYPE_TEACHER)){
                 reMap.put("userType",KxptConstant.USER_TYPE_TEACHER);
 
-            }else if(userDtoTemp.getUserTypeCode().equalsIgnoreCase(KxptConstant.USER_TYPE_STUDENT)){
+            }else if(userDtoTTest.getUserTypeCode().equalsIgnoreCase(KxptConstant.USER_TYPE_STUDENT)){
                 //学员
                 reMap.put("userType",KxptConstant.USER_TYPE_STUDENT);
             }else {

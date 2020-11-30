@@ -21,7 +21,7 @@ import  com.baomidou.mybatisplus.annotation.TableField;
  *   @description : CourseData 实体类
  *   ---------------------------------
  * 	 @author li
- *   @since 2020-11-24
+ *   @since 2020-11-26
  */
 @TableName("course_data")
 public class CourseData extends BaseEntity  implements Serializable {
@@ -36,6 +36,14 @@ public class CourseData extends BaseEntity  implements Serializable {
 
 
 	private Long id;
+
+	/**
+	 * 课程id 做绑定
+	 */
+	@ApiModelProperty("课程id 做绑定")
+	@TableField("course_id")
+
+	private Integer courseId;
 
 	/**
 	 * 课程名称
@@ -163,6 +171,16 @@ public class CourseData extends BaseEntity  implements Serializable {
 
 	public void setId(Long id) {
 		this.id = id;
+	}
+
+
+	public Integer getCourseId() {
+		return courseId;
+	}
+
+
+	public void setCourseId(Integer courseId) {
+		this.courseId = courseId;
 	}
 
 
@@ -320,6 +338,7 @@ public class CourseData extends BaseEntity  implements Serializable {
 	public String toString() {
 		return "CourseData{" +
 				"id=" + id +
+				", courseId=" + courseId +
 				", name=" + name +
 				", description=" + description +
 				", video=" + video +

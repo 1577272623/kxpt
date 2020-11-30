@@ -54,10 +54,13 @@ public class StudentController extends BaseController<StudentService,Student> {
     public IPage<Student> getStudentList( @ApiParam(name="student",value="筛选条件") @RequestBody(required = false) Student student  ,
                                 @ApiParam(name="pageIndex",value="页数",required=true,defaultValue = "1")@RequestParam Integer pageIndex ,
                                 @ApiParam(name="pageSize",value="页大小",required=true,defaultValue = "10")@RequestParam Integer pageSize
-                                ) {
+                                ) throws InstantiationException, IllegalAccessException {
         Page<Student> page=new Page<Student>(pageIndex,pageSize);
-        QueryWrapper<Student> queryWrapper=new QueryWrapper<>(student);
-        return service.page(page,queryWrapper);
+        QueryWrapper<Student> queryWrapper=student.toWrapper(student);
+        IPage<Student> studentIPage = service.page(page,queryWrapper);
+
+
+        return studentIPage;
     }
 
     /**
@@ -132,8 +135,9 @@ public class StudentController extends BaseController<StudentService,Student> {
 	@PostMapping("/add")
     @ApiOperation(value="添加Student")
     public Boolean add(@RequestBody Student  student) throws Exception {
-	    QueryWrapper<Student> student1 = new QueryWrapper<Student>().eq("no", student.getNo());
-	    if (student1 !=null){
+	    QueryWrapper<Student> students = new QueryWrapper<Student>().eq("no", student.getNo());
+        Student student1 = service.getOne(students);
+	    if (student1 != null ){
             throw new RuntimeException("学号已存在,不可重复");
         }
         String account = JwtUtil.getClaim(request.getHeader("Token"), "account");

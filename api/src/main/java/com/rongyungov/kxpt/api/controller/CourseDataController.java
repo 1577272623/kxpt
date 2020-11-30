@@ -3,6 +3,7 @@ package com.rongyungov.kxpt.api.controller;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.rongyungov.kxpt.entity.Teacher;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -34,13 +35,15 @@ public class CourseDataController extends BaseController<CourseDataService,Cours
      */
     @PostMapping("/list")
     @ApiOperation(value = "获取分页数据信息")
-    public IPage<CourseData> getCourseDataList( @ApiParam(name="courseData",value="筛选条件") @RequestBody(required = false) CourseData courseData  ,
+    public IPage<CourseData> getCourseDataList( @ApiParam(name="courseData",value="筛选条件") @RequestBody(required = false) CourseData CourseData  ,
                                 @ApiParam(name="pageIndex",value="页数",required=true,defaultValue = "1")@RequestParam Integer pageIndex ,
                                 @ApiParam(name="pageSize",value="页大小",required=true,defaultValue = "10")@RequestParam Integer pageSize
-                                ) {
+                                ) throws InstantiationException, IllegalAccessException {
         Page<CourseData> page=new Page<CourseData>(pageIndex,pageSize);
-        QueryWrapper<CourseData> queryWrapper=new QueryWrapper<>(courseData);
-        return service.page(page,queryWrapper);
+        QueryWrapper<CourseData> queryWrapper=CourseData.toWrapper(CourseData);
+        IPage<CourseData> CourseDataIPage = service.page(page,queryWrapper);
+
+        return CourseDataIPage;
     }
 
     /**

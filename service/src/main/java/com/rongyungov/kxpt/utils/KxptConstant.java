@@ -17,4 +17,25 @@ public class KxptConstant {
      */
     public static final String USER_TYPE_TEACHER = "3";
 
+    /**
+     * 教师默认角色
+     */
+    public static final String TEACHER_DEFAULT_ROLE_NAME = "教师默认角色";
+
+    /**
+     * 学生默认角色
+     */
+    public static final String STUDENT_DEFAULT_ROLE_NAME = "学生默认角色";
+
+    /*
+    * 部门 二级学院
+    * */
+    public static final String DEPARTMENT_TYPE_XI = "1";
+
+    /*
+     * 部门 班级
+     * */
+    public static final String DEPARTMENT_TYPE_BAN = "2";
+
+
 }

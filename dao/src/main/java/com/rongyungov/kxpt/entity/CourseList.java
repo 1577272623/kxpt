@@ -12,6 +12,9 @@ import  com.baomidou.mybatisplus.annotation.IdType;
 import  com.baomidou.mybatisplus.extension.activerecord.Model;
 import  com.baomidou.mybatisplus.annotation.TableId;
 import  java.time.LocalDateTime;
+import java.util.List;
+
+import  com.baomidou.mybatisplus.annotation.TableLogic;
 import  com.rongyungov.framework.base.BaseEntity;
 import  com.baomidou.mybatisplus.annotation.TableField;
 
@@ -20,7 +23,7 @@ import  com.baomidou.mybatisplus.annotation.TableField;
  *   @description : CourseList 实体类
  *   ---------------------------------
  * 	 @author li
- *   @since 2020-11-19
+ *   @since 2020-11-24
  */
 @TableName("course_list")
 public class CourseList extends BaseEntity  implements Serializable {
@@ -71,15 +74,20 @@ public class CourseList extends BaseEntity  implements Serializable {
 	/**
 	 * 排序
 	 */
-	@ApiModelProperty("排序")
+	@ApiModelProperty("排序 越大级别越高")
 	@TableField("sort")
 
 	private Integer sort;
 
+	@TableField("isdeleted")
+	@TableLogic
+
+	private Integer isdeleted;
+
 	/**
 	 * 是否启用
 	 */
-	@ApiModelProperty("是否启用")
+	@ApiModelProperty("是否启用 1启用 0不启用 默认启用")
 	@TableField("is_use")
 
 	private String isUse;
@@ -156,7 +164,16 @@ public class CourseList extends BaseEntity  implements Serializable {
 
 	private LocalDateTime updatedTime;
 
+	@TableField(exist = false)
+	private List<CourseList> children;
 
+	public List<CourseList> getChildren() {
+		return children;
+	}
+
+	public void setChildren(List<CourseList> children) {
+		this.children = children;
+	}
 
 	public Long getId() {
 		return id;
@@ -215,6 +232,16 @@ public class CourseList extends BaseEntity  implements Serializable {
 
 	public void setSort(Integer sort) {
 		this.sort = sort;
+	}
+
+
+	public Integer getIsdeleted() {
+		return isdeleted;
+	}
+
+
+	public void setIsdeleted(Integer isdeleted) {
+		this.isdeleted = isdeleted;
 	}
 
 
@@ -327,6 +354,7 @@ public class CourseList extends BaseEntity  implements Serializable {
 				", type=" + type +
 				", path=" + path +
 				", sort=" + sort +
+				", isdeleted=" + isdeleted +
 				", isUse=" + isUse +
 				", parentid=" + parentid +
 				", ext1=" + ext1 +

@@ -222,9 +222,20 @@ private static final long serialVersionUID = 1L;
 				
 	private LocalDateTime updatedTime;
 
+	@TableField(
+			exist = false
+	)
+	private Long roleid;
 
-					
-        public Long getId() {
+	public Long getRoleid() {
+		return roleid;
+	}
+
+	public void setRoleid(Long roleid) {
+		this.roleid = roleid;
+	}
+
+	public Long getId() {
                 return id;
                 }
 

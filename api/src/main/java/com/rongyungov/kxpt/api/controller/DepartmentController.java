@@ -61,7 +61,7 @@ public class DepartmentController extends BaseController<DepartmentService,Depar
         for (Department department1 : groupBy.get("0")) {
             List<Department> departments1 =groupBy.get(String.valueOf(department1.getId()));
 
-            department1.setChildrenList(departments1);
+            department1.setChildren(departments1);
             departmentListList.add(department1);
         }
         return departmentListList;
@@ -76,7 +76,6 @@ public class DepartmentController extends BaseController<DepartmentService,Depar
     @GetMapping("/get/{id}")
     @ApiOperation(value = "通过id获取Department")
     public Department getDepartmentById(@PathVariable Long id) {
-
         Department department=service.getById(id);
         return department;
     }

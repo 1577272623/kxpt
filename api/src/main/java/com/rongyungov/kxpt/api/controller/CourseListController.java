@@ -1,30 +1,18 @@
 package com.rongyungov.kxpt.api.controller;
 
-import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.rongyungov.framework.baseapi.utils.UserCompanyUtils;
-import com.rongyungov.framework.baseapi.utils.UserUtils;
-import com.rongyungov.framework.entity.User;
-import com.rongyungov.framework.service.UserService;
-import com.rongyungov.framework.shiro.util.JwtUtil;
+import com.rongyungov.kxpt.Vo.courseListVo;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-<<<<<<< Updated upstream
-import java.util.ArrayList;
-import java.util.List;
-                import  com.rongyungov.framework.base.BaseController;
-=======
 
 import java.util.*;
 import java.util.stream.Collectors;
 
 import  com.rongyungov.framework.base.BaseController;
->>>>>>> Stashed changes
     import com.rongyungov.kxpt.service.CourseListService;
 import  com.rongyungov.kxpt.entity.CourseList;
 
@@ -51,32 +39,16 @@ public class CourseListController extends BaseController<CourseListService,Cours
     public IPage<CourseList> getCourseListList( @ApiParam(name="courseList",value="筛选条件") @RequestBody(required = false) CourseList courseList  ,
                                 @ApiParam(name="pageIndex",value="页数",required=true,defaultValue = "1")@RequestParam Integer pageIndex ,
                                 @ApiParam(name="pageSize",value="页大小",required=true,defaultValue = "10")@RequestParam Integer pageSize
-                                ) {
+                                ) throws InstantiationException, IllegalAccessException {
         Page<CourseList> page=new Page<CourseList>(pageIndex,pageSize);
-        QueryWrapper<CourseList> queryWrapper=new QueryWrapper<>(courseList);
-        return service.page(page,queryWrapper);
+        QueryWrapper<CourseList> queryWrapper=courseList.toWrapper(courseList);
+        IPage<CourseList> courseListIPage = service.page(page,queryWrapper);
+        return courseListIPage;
     }
 
-    /**
-     * @description : 分级获取分页列表
-     * ---------------------------------
-     * @author : li
-     * @since : Create in 2020-11-16
-     */
     @PostMapping("/listAll")
     @ApiOperation(value = "获取课程目录数据信息")
-<<<<<<< Updated upstream
-    public List<CourseList> getAllCourseListList() {
-        QueryWrapper<CourseList> queryWrapper = new QueryWrapper();
-        List<CourseList> courseLists = ((CourseListService)this.service).list(queryWrapper);
-
-//        for (CourseList courseList:courseLists){
-//            courseList
-//        }
-        return service.list(queryWrapper);
-=======
     public List<CourseList> getAllCourseListList(@ApiParam(name="courseList",value="筛选条件") @RequestBody(required = false) CourseList courseList) {
-
         QueryWrapper<CourseList> queryWrapper = new QueryWrapper(courseList);
         List<CourseList> courseLists = service.list(queryWrapper);
            Map<String, List<CourseList>> groupBy = courseLists.stream().collect(Collectors.groupingBy(CourseList::getParentid));
@@ -84,17 +56,18 @@ public class CourseListController extends BaseController<CourseListService,Cours
         //获取一级
         for (CourseList department1 : groupBy.get("0")) {
             List<CourseList> courseList1 =groupBy.get(String.valueOf(department1.getId()));
-            //子集排序
-            ArrayList<CourseList> courseLists_c = (ArrayList<CourseList>) courseList1;
-            courseLists_c.sort(Comparator.comparing(CourseList::getSort).reversed());
-            department1.setChildrenList(courseLists_c);
+            if (!(courseList1==null)) {
+                //子集排序
+                ArrayList<CourseList> courseLists_c = (ArrayList<CourseList>) courseList1;
+                courseLists_c.sort(Comparator.comparing(CourseList::getSort).reversed());
+                department1.setChildren(courseLists_c);
+            }
             courseListList.add(department1);
         }
         //父级排序
         ArrayList<CourseList> demoArray = (ArrayList<CourseList>) courseListList;
         demoArray.sort(Comparator.comparing(CourseList::getSort).reversed());
         return demoArray;
->>>>>>> Stashed changes
     }
 
     /**
@@ -119,7 +92,15 @@ public class CourseListController extends BaseController<CourseListService,Cours
     @DeleteMapping("/delete/{id}")
     @ApiOperation(value = "通过id删除CourseList")
     public Boolean delete(@PathVariable Long id) {
-        Boolean success=service.removeById(id);
+
+        List<CourseList> courseLists = service.list(new QueryWrapper<CourseList>().eq("parentid",id));
+        List<Long> ids=new ArrayList<>();
+        ids.add(id);
+        if (!(courseLists ==null)){
+            for (CourseList courseList:courseLists)
+                ids.add(courseList.getId());
+        }
+        Boolean success= service.removeByIds(ids);
         return success;
     }
 
