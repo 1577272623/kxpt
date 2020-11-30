@@ -76,6 +76,7 @@ public class DepartmentController extends BaseController<DepartmentService,Depar
     @GetMapping("/get/{id}")
     @ApiOperation(value = "通过id获取Department")
     public Department getDepartmentById(@PathVariable Long id) {
+
         Department department=service.getById(id);
         return department;
     }
