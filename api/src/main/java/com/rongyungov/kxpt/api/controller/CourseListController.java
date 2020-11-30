@@ -8,10 +8,8 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.springframework.web.bind.annotation.*;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
+
+import java.util.*;
 import java.util.stream.Collectors;
 
 import  com.rongyungov.framework.base.BaseController;
@@ -50,33 +48,26 @@ public class CourseListController extends BaseController<CourseListService,Cours
 
     @PostMapping("/listAll")
     @ApiOperation(value = "获取课程目录数据信息")
-    public List<courseListVo> getAllCourseListList(@ApiParam(name="courseList",value="筛选条件") @RequestBody(required = false) CourseList courseList) {
-        List<courseListVo> routerTree = new ArrayList();
-        List<CourseList> children = new ArrayList<>();
+    public List<CourseList> getAllCourseListList(@ApiParam(name="courseList",value="筛选条件") @RequestBody(required = false) CourseList courseList) {
         QueryWrapper<CourseList> queryWrapper = new QueryWrapper(courseList);
         List<CourseList> courseLists = service.list(queryWrapper);
-        for (CourseList courseList1:courseLists){
-            //父级
-            if (courseList1.getParentid().equalsIgnoreCase("0")){
-                courseListVo courseListVo = new courseListVo(courseList1.getName(),
-                        courseList1.getPath(),courseList1.getSort());
-                Long id = courseList1.getId();
-                for (CourseList courseList2:courseLists){
-                    //对应子级
-                    if (courseList2.getParentid().equalsIgnoreCase(String.valueOf(id))){
-//                        List<CourseList> sortList = courseLists.stream().sorted((a, b) -> a.getId() - b.getId()).collect(Collectors.toList());
-                        children.add(courseList2);
-                    }
-                }
-                //子级排序
-                List<CourseList> children2 = children.stream().sorted((a, b) -> a.getSort() - b.getSort()).collect(Collectors.toList());
-                courseListVo.setChildren(children2);
-                routerTree.add(courseListVo);
+           Map<String, List<CourseList>> groupBy = courseLists.stream().collect(Collectors.groupingBy(CourseList::getParentid));
+        List<CourseList> courseListList = new ArrayList<>();
+        //获取一级
+        for (CourseList department1 : groupBy.get("0")) {
+            List<CourseList> courseList1 =groupBy.get(String.valueOf(department1.getId()));
+            if (!(courseList1==null)) {
+                //子集排序
+                ArrayList<CourseList> courseLists_c = (ArrayList<CourseList>) courseList1;
+                courseLists_c.sort(Comparator.comparing(CourseList::getSort).reversed());
+                department1.setChildren(courseLists_c);
             }
+            courseListList.add(department1);
         }
         //父级排序
-        List<courseListVo> routerTree2 = routerTree.stream().sorted((a, b) -> a.getSort() - b.getSort()).collect(Collectors.toList());
-        return routerTree2;
+        ArrayList<CourseList> demoArray = (ArrayList<CourseList>) courseListList;
+        demoArray.sort(Comparator.comparing(CourseList::getSort).reversed());
+        return demoArray;
     }
 
     /**
@@ -101,7 +92,15 @@ public class CourseListController extends BaseController<CourseListService,Cours
     @DeleteMapping("/delete/{id}")
     @ApiOperation(value = "通过id删除CourseList")
     public Boolean delete(@PathVariable Long id) {
-        Boolean success=service.removeById(id);
+
+        List<CourseList> courseLists = service.list(new QueryWrapper<CourseList>().eq("parentid",id));
+        List<Long> ids=new ArrayList<>();
+        ids.add(id);
+        if (!(courseLists ==null)){
+            for (CourseList courseList:courseLists)
+                ids.add(courseList.getId());
+        }
+        Boolean success= service.removeByIds(ids);
         return success;
     }
 

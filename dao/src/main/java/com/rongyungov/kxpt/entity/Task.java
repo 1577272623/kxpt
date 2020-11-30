@@ -12,21 +12,19 @@ import  com.baomidou.mybatisplus.annotation.IdType;
 import  com.baomidou.mybatisplus.extension.activerecord.Model;
 import  com.baomidou.mybatisplus.annotation.TableId;
 import  java.time.LocalDateTime;
-import java.util.List;
-
 import  com.baomidou.mybatisplus.annotation.TableLogic;
 import  com.rongyungov.framework.base.BaseEntity;
 import  com.baomidou.mybatisplus.annotation.TableField;
 
 /**
  *code is far away from bug with the animal protecting
- *   @description : CourseList 实体类
+ *   @description : Task 实体类
  *   ---------------------------------
  * 	 @author li
- *   @since 2020-11-24
+ *   @since 2020-11-25
  */
-@TableName("course_list")
-public class CourseList extends BaseEntity  implements Serializable {
+@TableName("task")
+public class Task extends BaseEntity  implements Serializable {
 	private static final long serialVersionUID = 1L;
 
 	/**
@@ -40,65 +38,71 @@ public class CourseList extends BaseEntity  implements Serializable {
 	private Long id;
 
 	/**
-	 * 课程名称
+	 * 编号
 	 */
-	@ApiModelProperty("课程名称")
+	@ApiModelProperty("编号 no")
+
+	@TableId(value="no")
+
+
+	private Integer no;
+
+	/**
+	 * 任务名称
+	 */
+	@ApiModelProperty("任务名称")
 	@TableField("name")
 
 	private String name;
 
 	/**
-	 * 课程描述
+	 * 描述
 	 */
-	@ApiModelProperty("课程描述")
+	@ApiModelProperty("描述")
 	@TableField("description")
 
 	private String description;
 
 	/**
-	 * 课程类型
+	 * 附件
 	 */
-	@ApiModelProperty("课程类型")
-	@TableField("type")
+	@ApiModelProperty("附件")
+	@TableField("file")
 
-	private String type;
+	private String file;
 
 	/**
-	 * 地址
+	 * 结束时间
 	 */
-	@ApiModelProperty("地址")
-	@TableField("path")
+	@ApiModelProperty("结束时间")
+	@TableField("over_time")
 
-	private String path;
-
-	/**
-	 * 排序
-	 */
-	@ApiModelProperty("排序 越大级别越高")
-	@TableField("sort")
-
-	private Integer sort;
-
-	@TableField("isdeleted")
-	@TableLogic
-
-	private Integer isdeleted;
+	private String overTime;
 
 	/**
 	 * 是否启用
 	 */
-	@ApiModelProperty("是否启用 1启用 0不启用 默认启用")
+	@ApiModelProperty("是否启用")
 	@TableField("is_use")
 
 	private String isUse;
 
 	/**
-	 * 父级课程号
+	 * 所属部門
 	 */
-	@ApiModelProperty("父级课程号")
-	@TableField("parentid")
+	@ApiModelProperty("所属部門")
+	@TableField("class_no")
 
-	private String parentid;
+	private String classNo;
+
+	/**
+	 * 是否删除
+	 */
+	@ApiModelProperty("是否删除")
+	@TableField("isdeleted")
+	@TableLogic
+
+	private String isdeleted;
 
 	/**
 	 * 备用字段1
@@ -164,15 +168,13 @@ public class CourseList extends BaseEntity  implements Serializable {
 
 	private LocalDateTime updatedTime;
 
-	@TableField(exist = false)
-	private List<CourseList> children;
 
-	public List<CourseList> getChildren() {
-		return children;
+	public Integer getNo() {
+		return no;
 	}
 
-	public void setChildren(List<CourseList> children) {
-		this.children = children;
+	public void setNo(Integer no) {
+		this.no = no;
 	}
 
 	public Long getId() {
@@ -205,43 +207,23 @@ public class CourseList extends BaseEntity  implements Serializable {
 	}
 
 
-	public String getType() {
-		return type;
+	public String getFile() {
+		return file;
 	}
 
 
-	public void setType(String type) {
-		this.type = type;
+	public void setFile(String file) {
+		this.file = file;
 	}
 
 
-	public String getPath() {
-		return path;
+	public String getOverTime() {
+		return overTime;
 	}
 
 
-	public void setPath(String path) {
-		this.path = path;
-	}
-
-
-	public Integer getSort() {
-		return sort;
-	}
-
-
-	public void setSort(Integer sort) {
-		this.sort = sort;
-	}
-
-
-	public Integer getIsdeleted() {
-		return isdeleted;
-	}
-
-
-	public void setIsdeleted(Integer isdeleted) {
-		this.isdeleted = isdeleted;
+	public void setOverTime(String overTime) {
+		this.overTime = overTime;
 	}
 
 
@@ -255,13 +237,23 @@ public class CourseList extends BaseEntity  implements Serializable {
 	}
 
 
-	public String getParentid() {
-		return parentid;
+	public String getClassNo() {
+		return classNo;
 	}
 
 
-	public void setParentid(String parentid) {
-		this.parentid = parentid;
+	public void setClassNo(String classNo) {
+		this.classNo = classNo;
+	}
+
+
+	public String getIsdeleted() {
+		return isdeleted;
+	}
+
+
+	public void setIsdeleted(String isdeleted) {
+		this.isdeleted = isdeleted;
 	}
 
 
@@ -347,16 +339,15 @@ public class CourseList extends BaseEntity  implements Serializable {
 
 	@Override
 	public String toString() {
-		return "CourseList{" +
+		return "Task{" +
 				"id=" + id +
 				", name=" + name +
 				", description=" + description +
-				", type=" + type +
-				", path=" + path +
-				", sort=" + sort +
-				", isdeleted=" + isdeleted +
+				", file=" + file +
+				", overTime=" + overTime +
 				", isUse=" + isUse +
-				", parentid=" + parentid +
+				", classNo=" + classNo +
+				", isdeleted=" + isdeleted +
 				", ext1=" + ext1 +
 				", ext2=" + ext2 +
 				", ext3=" + ext3 +

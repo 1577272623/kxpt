@@ -115,7 +115,7 @@ public class MybatisGen2 {
                         map.put("abc", this.getConfig().getGlobalConfig().getAuthor() + "-mp");
                         this.setMap(map);
                     }
-                }.setFileOutConfigList(Collections.<FileOutConfig>singletonList(new FileOutConfig("/templates/mapper.xml.vm") {
+                }.setFileOutConfigList(Collections.<FileOutConfig>singletonList(new FileOutConfig("/tTestlates/mapper.xml.vm") {
                     // 自定义输出文件目录
                     @Override
                     public String outputFile(TableInfo tableInfo) {
@@ -125,14 +125,14 @@ public class MybatisGen2 {
         ).setTemplate(
                 // 关闭默认 xml 生成，调整生成 至 根目录
                 new TemplateConfig().setXml(null)
-                        // 自定义模板配置，模板可以参考源码 /mybatis-plus/src/main/resources/template 使用 copy
-                        // 至您项目 src/main/resources/template 目录下，模板名称也可自定义如下配置：
-                        .setController("/template/controller.java.vm")
-                        .setEntity("/template/entity.java.vm")
-                        .setMapper("/template/mapper.java.vm")
-                        .setXml("/template/mapper.xml.vm")
-                        .setService("/template/service.java.vm")
-                        .setServiceImpl("/template/serviceImpl.java.vm")
+                        // 自定义模板配置，模板可以参考源码 /mybatis-plus/src/main/resources/tTestlate 使用 copy
+                        // 至您项目 src/main/resources/tTestlate 目录下，模板名称也可自定义如下配置：
+                        .setController("/tTestlate/controller.java.vm")
+                        .setEntity("/tTestlate/entity.java.vm")
+                        .setMapper("/tTestlate/mapper.java.vm")
+                        .setXml("/tTestlate/mapper.xml.vm")
+                        .setService("/tTestlate/service.java.vm")
+                        .setServiceImpl("/tTestlate/serviceImpl.java.vm")
         );
 
         // 执行生成
