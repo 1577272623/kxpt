@@ -62,9 +62,7 @@ public class LoginAop {
 //    @Around("execution(* com.rongyungov.kxpt.api.controller.Userlogin.StudentLogin(..))")
     @Around("execution(* com.rongyungov.framework.baseapi.controller.LoginController.login(..))")
     public Result AfterLogin1(ProceedingJoinPoint joinPoint) throws Exception {
-
         Map<String,Object> reMap = new HashMap<>();
-
         User user = (User) joinPoint.getArgs()[0];
 //        Result res = (Result) joinPoint.proceed(); //调用目标方法
         //pointcut是对应的注解类   rvt就是方法运行完之后要返回的值
@@ -94,7 +92,6 @@ public class LoginAop {
                 String newpassword = AesCipherUtil.encrypt(findTeacher.getTeano()+password);
                 //替换登录的 密码
                 user.setPassword(newpassword);
-
                 account = findTeacher.getTeano();
             }else{
                 account = user.getAccount();
@@ -117,11 +114,9 @@ public class LoginAop {
                 String newpassword = AesCipherUtil.encrypt(findStudent.getNo()+password);
                 //替换登录的 密码
                 user.setPassword(newpassword);
-
                 account = findStudent.getNo();
             }else{
 //                String password = AesCipherUtil.desEncrypt(user.getPassword()).replace(user.getAccount(),"");
-
                 account = user.getAccount();
             }
             userDtoTTest.setUserTypeCode(KxptConstant.USER_TYPE_STUDENT);
@@ -129,20 +124,6 @@ public class LoginAop {
         userDtoTTest.setAccount(account);
         QueryWrapper<User> queryWrapper = new QueryWrapper(userDtoTTest);
         userDtoTTest = userService.getOne(queryWrapper);
-
-
-        //手机登录
-//        if (CheckUtils.isPhoneLegal(account)){
-//            userDtoTTest.setTelephone(account);
-//        }else {
-//            //学号登录
-//            userDtoTTest.setAccount(account);
-//        }
-//        QueryWrapper<User> queryWrapper = new QueryWrapper(userDtoTTest);
-//        userDtoTTest = userService.getOne(queryWrapper);
-//        user.setPassword(AesCipherUtil.encrypt(userDtoTTest.getPassword()));
-
-
         if (userDtoTTest == null) {
             throw new CustomUnauthorizedException("该帐号不存在");
         } else if (!userDtoTTest.getIsAccessLogin().equalsIgnoreCase("1")){
@@ -154,7 +135,6 @@ public class LoginAop {
                 JedisUtil.delKey("shiro:login:" + re_token);
             }
             String currentTimeMillis = "";
-
             if (JedisUtil.exists("shiro:refresh_token:" + re_token)) {
                 currentTimeMillis = (String)JedisUtil.getObject("shiro:refresh_token:" + re_token);
             } else {
@@ -164,9 +144,7 @@ public class LoginAop {
             String token = JwtUtil.sign(userDtoTTest, currentTimeMillis);
             BaseapiApplication.saveLoginUserIdsAndCompanyIds(userDtoTTest.getAccount(), userDtoTTest.getId(), userDtoTTest.getCompanyId());
             JedisUtil.setObject("shiro:login:" + re_token, userDtoTTest);
-
             reMap.put("token",token);
-
             //教师
             if(userDtoTTest.getUserTypeCode().equalsIgnoreCase(KxptConstant.USER_TYPE_TEACHER)){
                 reMap.put("userType",KxptConstant.USER_TYPE_TEACHER);
@@ -178,7 +156,6 @@ public class LoginAop {
                 //管理员
                 reMap.put("userType",KxptConstant.USER_TYPE_USER);
             }
-
             return Result.ok(reMap);
         }
     }

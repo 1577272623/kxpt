@@ -41,10 +41,8 @@ public class Task extends BaseEntity  implements Serializable {
 	 * 编号
 	 */
 	@ApiModelProperty("编号 no")
-
 	@TableId(value="no")
-
-
+	@TableField(exist = false)
 	private Integer no;
 
 	/**

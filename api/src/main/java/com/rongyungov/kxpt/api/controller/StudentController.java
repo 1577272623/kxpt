@@ -152,10 +152,17 @@ public class StudentController extends BaseController<StudentService,Student> {
     @ApiOperation(value = "获取任务列表")
     public List<Task> task(@RequestBody Student  student){
         List<DepTask> deptaskList = depTaskService.list(new QueryWrapper<DepTask>().eq("depart_id",student.getClassno()));
+        List<Task> taskList = taskService.list(new QueryWrapper<>());
         List<String>  ids=new ArrayList<>();
-        for (DepTask depTask:deptaskList)
-            ids.add(depTask.getDepartId());
-        List<Task> taskList = taskService.list(new QueryWrapper<Task>().eq("id",ids));
-	    return taskList;
+        List<Task> tasks = new ArrayList<>();
+        for (DepTask depTask:deptaskList) {
+            for (Task task:taskList){
+                if(depTask.getTaskId().equals(String.valueOf(task.getId()))){
+                    tasks.add(task);
+                }
+            }
+        }
+
+	    return tasks;
     }
 }
