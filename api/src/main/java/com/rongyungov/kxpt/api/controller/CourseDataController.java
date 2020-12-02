@@ -3,10 +3,13 @@ package com.rongyungov.kxpt.api.controller;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.rongyungov.kxpt.entity.CourseList;
 import com.rongyungov.kxpt.entity.Teacher;
+import com.rongyungov.kxpt.service.CourseListService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import java.util.ArrayList;
@@ -27,6 +30,8 @@ import  com.rongyungov.kxpt.entity.CourseData;
 @RequestMapping("/courseData")
 public class CourseDataController extends BaseController<CourseDataService,CourseData> {
 
+    @Autowired
+    CourseListService courseListService;
     /**
      * @description : 获取分页列表
      * ---------------------------------
@@ -55,7 +60,11 @@ public class CourseDataController extends BaseController<CourseDataService,Cours
     @GetMapping("/get/{id}")
     @ApiOperation(value = "通过id获取CourseData")
     public CourseData getCourseDataById(@PathVariable Long id) {
-        CourseData courseData=service.getById(id);
+        CourseData courseData = new CourseData();
+        List<CourseList> courseLists = courseListService.list(new QueryWrapper<CourseList>().eq("id",id));
+        if (courseLists!=null&&courseLists.size()!=0){
+             courseData=service.getOne(new QueryWrapper<CourseData>().eq("course_id",id));
+        }
         return courseData;
     }
 
@@ -67,7 +76,7 @@ public class CourseDataController extends BaseController<CourseDataService,Cours
      */
     @DeleteMapping("/delete/{id}")
     @ApiOperation(value = "通过id删除CourseData")
-    public Boolean delete(@PathVariable Long id) {
+    public Boolean delete(@PathVariable Long id){
         Boolean success=service.removeById(id);
         return success;
     }

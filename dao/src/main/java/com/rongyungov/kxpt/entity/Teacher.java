@@ -21,7 +21,7 @@ import  com.baomidou.mybatisplus.annotation.TableField;
  *   @description : Teacher 实体类
  *   ---------------------------------
  * 	 @author li
- *   @since 2020-11-25
+ *   @since 2020-11-26
  */
 @TableName("teacher")
 public class Teacher extends BaseEntity  implements Serializable {
@@ -187,9 +187,8 @@ public class Teacher extends BaseEntity  implements Serializable {
 	 */
 	@ApiModelProperty("更新时间")
 	@TableField("updated_time")
-
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
 	private LocalDateTime updatedTime;
-
 
 
 	public Long getId() {

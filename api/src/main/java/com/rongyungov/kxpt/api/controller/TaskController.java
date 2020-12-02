@@ -12,6 +12,8 @@ import io.swagger.annotations.ApiParam;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -48,14 +50,15 @@ public class TaskController extends BaseController<TaskService,Task> {
                                 ) throws InstantiationException, IllegalAccessException {
         Page<Task> page=new Page<Task>(pageIndex,pageSize);
         QueryWrapper<Task> queryWrapper=task.toWrapper(task);
+        queryWrapper.orderByDesc("created_time");
         int i =0;
-        List<Task> taskList = service.list(queryWrapper);
-        for (Task task1:taskList){
-            i++;
-            task1.setNo(i);
-        }
-
         IPage<Task> taskPage = service.page(page,queryWrapper);
+        for (int j =0; j<taskPage.getRecords().size(); j++){
+            i++;
+            int s= (int) taskPage.getSize();
+            int c= (int) (taskPage.getCurrent()-1);
+            taskPage.getRecords().get(j).setNo(i+s*c);
+        }
         return taskPage;
     }
 
@@ -104,7 +107,6 @@ public class TaskController extends BaseController<TaskService,Task> {
         }
         return success;
     }
-
     /**
      * @description : 通过id更新Task
      * ---------------------------------
@@ -119,7 +121,6 @@ public class TaskController extends BaseController<TaskService,Task> {
         Boolean success=service.updateById(task);
         return success;
     }
-
     /**
      * @description : 添加Task
      * ---------------------------------
@@ -129,9 +130,10 @@ public class TaskController extends BaseController<TaskService,Task> {
 	@PostMapping("/add")
     @ApiOperation(value="添加Task")
     public Boolean add(@RequestBody Task  task) {
-        Boolean success=service.save( task);
+        Boolean success =false;
+        LocalDateTime dateTime = LocalDateTime.now();
+        task.setCreatedTime(dateTime);
+        success=service.save(task);
         return success;
 	}
-
-
 }

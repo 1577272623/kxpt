@@ -3,22 +3,33 @@ package com.rongyungov.kxpt.api.controller;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.rongyungov.framework.base.Result;
 import com.rongyungov.framework.shiro.util.AesCipherUtil;
 import com.rongyungov.framework.shiro.util.JwtUtil;
 import com.rongyungov.kxpt.entity.DepTask;
 import com.rongyungov.kxpt.entity.Task;
+import com.rongyungov.kxpt.entity.Test;
 import com.rongyungov.kxpt.service.DepTaskService;
 import com.rongyungov.kxpt.service.TaskService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
+import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-                import  com.rongyungov.framework.base.BaseController;
+import java.util.Map;
+
+import  com.rongyungov.framework.base.BaseController;
     import com.rongyungov.kxpt.service.StudentService;
 import  com.rongyungov.kxpt.entity.Student;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -145,17 +156,96 @@ public class StudentController extends BaseController<StudentService,Student> {
         student.setPassword(AesCipherUtil.encrypt(student.getNo() + student.getPassword()));
         Boolean success = ((StudentService)this.service).save(student);
         return success;
-
 	}
+
+    /**
+     * @description : 添加竞赛Student
+     * ---------------------------------
+     * @author : li
+     * @since : Create in 2020-11-11
+     * @return
+     */
+    @PostMapping("/addsaiImport")
+    @ApiOperation(value="导入竞赛Student")
+    public Boolean addsai(MultipartFile excel) throws Exception {
+
+        InputStream in = excel.getInputStream();
+        XSSFWorkbook work = new XSSFWorkbook(in);
+        int fail = 0, success = 0;
+        StringBuffer sb = new StringBuffer();
+        XSSFSheet Sheet1 = work.getSheet("Sheet1");
+        for (int i = 1; i < Sheet1.getLastRowNum()+1; i++) {
+            try {
+                success++;
+                Test test1 = new Test();
+
+                XSSFRow row = Sheet1.getRow(i);
+                if (String.valueOf(row.getCell(0)).equalsIgnoreCase("判断题") || String.valueOf(row.getCell(0)).equalsIgnoreCase("填空题")) {
+                    if (String.valueOf(row.getCell(0)).equalsIgnoreCase("判断题")) {
+                        test1.setStType("1");
+                    } else {
+                        test1.setStType("4");
+                    }
+                    test1.setStContent(String.valueOf(row.getCell(1)));
+                    test1.setStAnswer(String.valueOf(row.getCell(6)));
+                    if (!(row.getCell(0) == null)) {
+                        test1.setAnalysis(String.valueOf(row.getCell(7)));
+                    }
+//                    service.save(test1);
+                } else if (String.valueOf(row.getCell(0)).equalsIgnoreCase("单选题") || String.valueOf(row.getCell(0)).equalsIgnoreCase("多选题")) {
+                    if (String.valueOf(row.getCell(0)).equalsIgnoreCase("单选题")) {
+                        test1.setStType("2");
+                    } else {
+                        test1.setStType("3");
+                    }
+                    test1.setStContent(String.valueOf(row.getCell(0)));
+                    test1.setAnswerA(String.valueOf(row.getCell(2)));
+                    test1.setAnswerB(String.valueOf(row.getCell(3)));
+                    test1.setAnswerC(String.valueOf(row.getCell(4)));
+                    test1.setAnswerD(String.valueOf(row.getCell(5)));
+                    test1.setStAnswer(String.valueOf(row.getCell(6)));
+                    if (!(row.getCell(7) == null)) {
+                        test1.setAnalysis(String.valueOf(row.getCell(7)));
+                    }
+//                    service.save(test1);
+                }
+            } catch(Exception e){
+                fail++;
+//                sb.append("<br>试题：" + test1 + "，&nbsp;&nbsp;");
+//                sb.append("失败原因：");
+                sb.append(e.getMessage() + "");
+            }
+        }
+        Map<String, Object> map = new HashMap<>();
+        StringBuffer stringBuffer = new StringBuffer();
+        stringBuffer.append("成功导入" + (success - fail) + "条记录， 失败：" + fail + "条记录<br>");
+        if (fail > 0) {
+            stringBuffer.append("失败的信息为：");
+            map.put("fail", fail);
+        } else {
+            map.put("fail", 0);
+        }
+        stringBuffer.append(sb.toString());
+        String msg = stringBuffer.toString();
+        map.put("msg", msg);
+        return null;
+
+    }
 
 	@PostMapping("/task")
     @ApiOperation(value = "获取任务列表")
     public List<Task> task(@RequestBody Student  student){
         List<DepTask> deptaskList = depTaskService.list(new QueryWrapper<DepTask>().eq("depart_id",student.getClassno()));
+        List<Task> taskList = taskService.list(new QueryWrapper<>());
         List<String>  ids=new ArrayList<>();
-        for (DepTask depTask:deptaskList)
-            ids.add(depTask.getDepartId());
-        List<Task> taskList = taskService.list(new QueryWrapper<Task>().eq("id",ids));
-	    return taskList;
+        List<Task> tasks = new ArrayList<>();
+        for (DepTask depTask:deptaskList) {
+            for (Task task:taskList){
+                if(depTask.getTaskId().equals(String.valueOf(task.getId()))){
+                    tasks.add(task);
+                }
+            }
+        }
+        return tasks;
     }
 }

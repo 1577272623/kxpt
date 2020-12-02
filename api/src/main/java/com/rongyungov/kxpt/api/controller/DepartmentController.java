@@ -3,16 +3,15 @@ package com.rongyungov.kxpt.api.controller;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.rongyungov.kxpt.Vo.courseListVo;
-import com.rongyungov.kxpt.entity.CourseList;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.springframework.web.bind.annotation.*;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
+
+import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import  com.rongyungov.framework.base.BaseController;
@@ -136,8 +135,15 @@ public class DepartmentController extends BaseController<DepartmentService,Depar
      */
 	@PostMapping("/add")
     @ApiOperation(value="添加Department")
-    public Boolean add(@RequestBody Department  department) {
-        Boolean success=service.save( department);
+    public Boolean add(@RequestBody Department  department) throws Exception {
+	    Boolean success =false;
+	    if (department.getParentId()!=null){
+            LocalDateTime dateTime = LocalDateTime.now();
+            department.setCreatedTime(dateTime);
+            success=service.save( department);
+        }else {
+	        throw new Exception("ParentId不能为空");
+        }
         return success;
 	}
 

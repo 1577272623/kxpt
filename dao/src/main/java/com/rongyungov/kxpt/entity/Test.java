@@ -199,7 +199,16 @@ public class Test extends BaseEntity  implements Serializable {
 
 	private LocalDateTime updatedTime;
 
+	@TableField(exist = false)
+	private  int no;
 
+	public int getNo() {
+		return no;
+	}
+
+	public void setNo(int no) {
+		this.no = no;
+	}
 
 	public Long getId() {
 		return id;

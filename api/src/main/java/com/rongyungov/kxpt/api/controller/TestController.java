@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.rongyungov.framework.base.Result;
 import com.rongyungov.kxpt.entity.CourseList;
+import com.rongyungov.kxpt.entity.Task;
 import com.rongyungov.kxpt.utils.ExcelUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -49,14 +50,57 @@ public class TestController extends BaseController<TestService,Test> {
      */
     @PostMapping("/list")
     @ApiOperation(value = "获取分页数据信息")
-    public IPage<Test> getTestList( @ApiParam(name="test",value="筛选条件") @RequestBody(required = false) Test Test  ,
+    public IPage<Test> getTestList( @ApiParam(name="test",value="筛选条件") @RequestBody(required = false) Test test  ,
                                 @ApiParam(name="pageIndex",value="页数",required=true,defaultValue = "1")@RequestParam Integer pageIndex ,
                                 @ApiParam(name="pageSize",value="页大小",required=true,defaultValue = "10")@RequestParam Integer pageSize
                                 ) throws InstantiationException, IllegalAccessException {
         Page<Test> page=new Page<Test>(pageIndex,pageSize);
-        QueryWrapper<Test> queryWrapper=Test.toWrapper(Test);
-        IPage<Test> courseListIPage = service.page(page,queryWrapper);
-        return courseListIPage;
+        Test test1 = new Test();
+        test1.setKeno(test.getKeno());
+//        QueryWrapper<Test> queryWrapper=Test.toWrapper(Test);
+        QueryWrapper<Test> objectQueryWrapper = new QueryWrapper<Test>(test1);
+        int i =0;
+        IPage<Test> taskPage = service.page(page,objectQueryWrapper);
+        for (int j =0; j<taskPage.getRecords().size(); j++){
+            i++;
+            int s= (int) taskPage.getSize();
+            int c= (int) (taskPage.getCurrent()-1);
+            taskPage.getRecords().get(j).setNo(i+s*c);
+        }
+        return taskPage;
+    }
+
+    /**
+     * @description : 获取分页列表
+     * ---------------------------------
+     * @author : li
+     * @since : Create in 2020-11-11
+     */
+    @PostMapping("/listAll")
+    @ApiOperation(value = "按条件获取数据信息")
+    public Map<String,Object> getTestListAll( @ApiParam(name="test",value="筛选条件") @RequestBody(required = false) long id) {
+        Map<String,Object> testMap = new HashMap<>();
+        List<Test> testList1 = service.list(new QueryWrapper<Test>().eq("keno",id));
+        List<Test> testList = new ArrayList<>();
+        List<Test> testList2 = new ArrayList<>();
+        List<Test> testList3 = new ArrayList<>();
+        List<Test> testList4 = new ArrayList<>();
+        for (Test test:testList1){
+            if (test.getStType().equals("1")){
+                testList.add(test);
+                testMap.put("1",testList);
+            }else if (test.getStType().equals("2")){
+                testList2.add(test);
+                testMap.put("2",testList2);
+            }else if (test.getStType().equals("3")){
+                testList3.add(test);
+                testMap.put("3",testList3);
+            }else{
+                testList4.add(test);
+                testMap.put("4",testList4);
+            }
+        }
+        return testMap;
     }
 
     /**
@@ -129,7 +173,11 @@ public class TestController extends BaseController<TestService,Test> {
 	@PostMapping("/add")
     @ApiOperation(value="添加Test")
     public Boolean add(@RequestBody Test  test) {
-        Boolean success=service.save(test);
+        Test test1 = new Test();
+        Boolean success = false;
+        if (test.getStType()!=null&&test.getKeno()!=null){
+            success=service.save(test);
+        }
         return success;
 	}
 
@@ -139,8 +187,8 @@ public class TestController extends BaseController<TestService,Test> {
     @PostMapping("/testImport")
     @ApiOperation(value = "试题导入")
     @Transactional
-    public Result testImport(MultipartFile excel) throws Exception {
-        String keno = "1";
+    public Result testImport(MultipartFile excel,String id) throws Exception {
+        String keno = id;
         //模拟数据
         InputStream in = excel.getInputStream();
         XSSFWorkbook work = new XSSFWorkbook(in);
