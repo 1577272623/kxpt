@@ -12,6 +12,8 @@ import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
                 import  com.rongyungov.framework.base.BaseController;
@@ -124,7 +126,9 @@ public class CourseDataController extends BaseController<CourseDataService,Cours
      */
 	@PostMapping("/add")
     @ApiOperation(value="添加CourseData")
-    public Boolean add(@RequestBody CourseData  courseData) {
+    public Boolean add(@RequestBody CourseData courseData) {
+        LocalDateTime dateTime = LocalDateTime.now();
+        courseData.setCreatedTime(dateTime);
         Boolean success=service.save( courseData);
         return success;
 	}

@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.rongyungov.framework.base.Result;
+import com.rongyungov.framework.common.StringUtil;
 import com.rongyungov.kxpt.entity.CourseList;
 import com.rongyungov.kxpt.entity.Task;
 import com.rongyungov.kxpt.utils.ExcelUtils;
@@ -57,8 +58,17 @@ public class TestController extends BaseController<TestService,Test> {
         Page<Test> page=new Page<Test>(pageIndex,pageSize);
         Test test1 = new Test();
         test1.setKeno(test.getKeno());
-//        QueryWrapper<Test> queryWrapper=Test.toWrapper(Test);
+        test1.setStType(test.getStType());
+        test1.setStContent(test.getStContent());
         QueryWrapper<Test> objectQueryWrapper = new QueryWrapper<Test>(test1);
+
+        if(test != null && StringUtil.isNotBlank(test.getKeno())){
+            objectQueryWrapper.eq("keno",test.getKeno());
+        }
+        else {
+            objectQueryWrapper.like("st_content",test.getStContent());
+        }
+
         int i =0;
         IPage<Test> taskPage = service.page(page,objectQueryWrapper);
         for (int j =0; j<taskPage.getRecords().size(); j++){
@@ -85,6 +95,7 @@ public class TestController extends BaseController<TestService,Test> {
         List<Test> testList2 = new ArrayList<>();
         List<Test> testList3 = new ArrayList<>();
         List<Test> testList4 = new ArrayList<>();
+//        int
         for (Test test:testList1){
             if (test.getStType().equals("1")){
                 testList.add(test);
@@ -184,12 +195,13 @@ public class TestController extends BaseController<TestService,Test> {
     /**
      * 试题上传
      */
-    @PostMapping("/testImport")
-    @ApiOperation(value = "试题导入")
+    @PostMapping("/testRead")
+    @ApiOperation(value = "试题读取")
     @Transactional
-    public Result testImport(MultipartFile excel,String id) throws Exception {
+    public Result testReaf(MultipartFile excel,String id) throws Exception {
         String keno = id;
         //模拟数据
+        List<Test> testList = new ArrayList<>();
         InputStream in = excel.getInputStream();
         XSSFWorkbook work = new XSSFWorkbook(in);
         int fail = 0, success = 0;
@@ -201,45 +213,45 @@ public class TestController extends BaseController<TestService,Test> {
                 Test test1 = new Test();
                 test1.setKeno(keno);
                 XSSFRow row = Sheet1.getRow(i);
-                    if (String.valueOf(row.getCell(0)).equalsIgnoreCase("判断题") || String.valueOf(row.getCell(0)).equalsIgnoreCase("填空题")) {
-                        if (String.valueOf(row.getCell(0)).equalsIgnoreCase("判断题")) {
-                            test1.setStType("1");
-                        } else {
-                            test1.setStType("4");
-                        }
-                        test1.setStContent(String.valueOf(row.getCell(1)));
-                        test1.setStAnswer(String.valueOf(row.getCell(6)));
-                        if (!(row.getCell(0) == null)) {
-                            test1.setAnalysis(String.valueOf(row.getCell(7)));
-                        }
-                        service.save(test1);
-                    } else if (String.valueOf(row.getCell(0)).equalsIgnoreCase("单选题") || String.valueOf(row.getCell(0)).equalsIgnoreCase("多选题")) {
-                        if (String.valueOf(row.getCell(0)).equalsIgnoreCase("单选题")) {
-                            test1.setStType("2");
-                        } else {
-                            test1.setStType("3");
-                        }
-                        test1.setStContent(String.valueOf(row.getCell(0)));
-                        test1.setAnswerA(String.valueOf(row.getCell(2)));
-                        test1.setAnswerB(String.valueOf(row.getCell(3)));
-                        test1.setAnswerC(String.valueOf(row.getCell(4)));
-                        test1.setAnswerD(String.valueOf(row.getCell(5)));
-                        test1.setStAnswer(String.valueOf(row.getCell(6)));
-                        if (!(row.getCell(7) == null)) {
-                            test1.setAnalysis(String.valueOf(row.getCell(7)));
-                        }
-                        service.save(test1);
+                if (String.valueOf(row.getCell(0)).equalsIgnoreCase("判断题") || String.valueOf(row.getCell(0)).equalsIgnoreCase("填空题")) {
+                    if (String.valueOf(row.getCell(0)).equalsIgnoreCase("判断题")) {
+                        test1.setStType("1");
+                    } else {
+                        test1.setStType("4");
+                    }
+                    test1.setStContent(String.valueOf(row.getCell(1)));
+                    test1.setStAnswer(String.valueOf(row.getCell(6)));
+                    if (!(row.getCell(0) == null)) {
+                        test1.setAnalysis(String.valueOf(row.getCell(7)));
+                    }
+                    testList.add(test1);
+//                    service.save(test1);
+                } else if (String.valueOf(row.getCell(0)).equalsIgnoreCase("单选题") || String.valueOf(row.getCell(0)).equalsIgnoreCase("多选题")) {
+                    if (String.valueOf(row.getCell(0)).equalsIgnoreCase("单选题")) {
+                        test1.setStType("2");
+                    } else {
+                        test1.setStType("3");
+                    }
+                    test1.setStContent(String.valueOf(row.getCell(0)));
+                    test1.setAnswerA(String.valueOf(row.getCell(2)));
+                    test1.setAnswerB(String.valueOf(row.getCell(3)));
+                    test1.setAnswerC(String.valueOf(row.getCell(4)));
+                    test1.setAnswerD(String.valueOf(row.getCell(5)));
+                    test1.setStAnswer(String.valueOf(row.getCell(6)));
+                    if (!(row.getCell(7) == null)) {
+                        test1.setAnalysis(String.valueOf(row.getCell(7)));
+                    }
+                    testList.add(test1);
+//                    service.save(test1);
                 }
-                } catch(Exception e){
-                    fail++;
-//                sb.append("<br>试题：" + test1 + "，&nbsp;&nbsp;");
-//                sb.append("失败原因：");
-                    sb.append(e.getMessage() + "");
-                }
+            } catch(Exception e){
+                fail++;
+                sb.append(e.getMessage() + "");
             }
+        }
         Map<String, Object> map = new HashMap<>();
         StringBuffer stringBuffer = new StringBuffer();
-        stringBuffer.append("成功导入" + (success - fail) + "条记录， 失败：" + fail + "条记录<br>");
+        stringBuffer.append("成功读取" + (success - fail) + "条记录， 失败：" + fail + "条记录<br>");
         if (fail > 0) {
             stringBuffer.append("失败的信息为：");
             map.put("fail", fail);
@@ -249,7 +261,30 @@ public class TestController extends BaseController<TestService,Test> {
         stringBuffer.append(sb.toString());
         String msg = stringBuffer.toString();
         map.put("msg", msg);
+        map.put("test",testList);
         return Result.ok(map);
     }
 
+
+    /**
+     * 试题上传
+     */
+    @PostMapping("/testImport")
+    @ApiOperation(value = "试题导入")
+    @Transactional
+    public Result testImport(List<Test> testList) throws Exception {
+        int fail = 0, success = 0;
+        for (Test test:testList){
+            boolean b = service.save(test);
+            if (b){
+                success++;
+            }else fail++;
+        }
+        Map<String, Object> map = new HashMap<>();
+        StringBuffer stringBuffer = new StringBuffer();
+        stringBuffer.append("成功读取" + success  + "条记录， 失败：" + fail + "条记录<br>");
+        String msg = stringBuffer.toString();
+        map.put("msg", msg);
+        return Result.ok(map);
+    }
 }

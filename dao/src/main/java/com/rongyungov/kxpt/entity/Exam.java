@@ -188,15 +188,112 @@ public class Exam extends BaseEntity  implements Serializable {
 
 	private LocalDateTime updatedTime;
 
+	/**
+	 * 所选课程id 用逗号拼接
+	 */
+	@ApiModelProperty("所选课程id 用逗号拼接")
+	@TableField("course_id")
+
+	private String courseId;
+
+	/**
+	 * 实操题数量 分数 用逗号分隔
+	 */
+	@ApiModelProperty("实操题数量 分数 用逗号分隔")
+	@TableField("type5")
+
+	private String type5;
+
+	/**
+	 * 填空题数量 分数 用逗号分隔
+	 */
+	@ApiModelProperty("填空题数量 分数 用逗号分隔")
+	@TableField("type4")
+
+	private String type4;
+
+	/**
+	 * 多选数量 分数 用逗号分隔
+	 */
+	@ApiModelProperty("多选数量 分数 用逗号分隔")
+	@TableField("type3")
+
+	private String type3;
+
+	/**
+	 * 单选题数量 分数 用逗号分隔
+	 */
+	@ApiModelProperty("单选题数量 分数 用逗号分隔")
+	@TableField("type2")
+
+	private String type2;
+
+	/**
+	 * 判断题数量 分数 用逗号分隔
+	 */
+	@ApiModelProperty("判断题数量 分数 用逗号分隔")
+	@TableField("type1")
+
+	private String type1;
+
+
 	@ApiModelProperty("排序编号")
 	@TableField(exist = false)
-	private int no;
+	private String no;
 
-	public int getNo() {
+	public String getCourseId() {
+		return courseId;
+	}
+
+	public void setCourseId(String courseId) {
+		this.courseId = courseId;
+	}
+
+	public String getType5() {
+		return type5;
+	}
+
+	public void setType5(String type5) {
+		this.type5 = type5;
+	}
+
+	public String getType4() {
+		return type4;
+	}
+
+	public void setType4(String type4) {
+		this.type4 = type4;
+	}
+
+	public String getType3() {
+		return type3;
+	}
+
+	public void setType3(String type3) {
+		this.type3 = type3;
+	}
+
+	public String getType2() {
+		return type2;
+	}
+
+	public void setType2(String type2) {
+		this.type2 = type2;
+	}
+
+	public String getType1() {
+		return type1;
+	}
+
+	public void setType1(String type1) {
+		this.type1 = type1;
+	}
+
+	public String getNo() {
 		return no;
 	}
 
-	public void setNo(int no) {
+	public void setNo(String no) {
 		this.no = no;
 	}
 

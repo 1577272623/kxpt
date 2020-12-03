@@ -3,6 +3,8 @@ package com.rongyungov.kxpt.api.controller;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.rongyungov.framework.common.StringUtil;
+import com.rongyungov.kxpt.entity.Test;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -43,7 +45,13 @@ public class DepartmentController extends BaseController<DepartmentService,Depar
                                 @ApiParam(name="pageSize",value="页大小",required=true,defaultValue = "10")@RequestParam Integer pageSize
                                 ) throws InstantiationException, IllegalAccessException {
         Page<Department> page=new Page<Department>(pageIndex,pageSize);
-        QueryWrapper<Department> queryWrapper=department.toWrapper(department);
+        QueryWrapper<Department> queryWrapper = new QueryWrapper<>(new Department());
+        if(department != null && StringUtil.isNotBlank(department.getParentId())){
+            queryWrapper.eq("parent_id",department.getParentId());
+        }
+        else {
+            queryWrapper.like("name",department.getName());
+        }
         IPage<Department> departmentIPage = service.page(page,queryWrapper);
         return departmentIPage;
     }

@@ -9,6 +9,8 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
                 import  com.rongyungov.framework.base.BaseController;
@@ -41,6 +43,7 @@ public class NoticeController extends BaseController<NoticeService,Notice> {
                                 ) throws InstantiationException, IllegalAccessException {
         Page<Notice> page=new Page<Notice>(pageIndex,pageSize);
         QueryWrapper<Notice> queryWrapper=notice.toWrapper(notice);
+        queryWrapper.orderByDesc("created_time");
         int i =0;
         IPage<Notice> noticeIPage = service.page(page,queryWrapper);
         for (int j =0; j<noticeIPage.getRecords().size(); j++){
@@ -123,6 +126,8 @@ public class NoticeController extends BaseController<NoticeService,Notice> {
     @ApiOperation(value="添加Notice")
     public Boolean add(@RequestBody Notice  notice) {
         Boolean success=service.save( notice);
+        LocalDateTime dateTime = LocalDateTime.now();
+        notice.setCreatedTime(dateTime);
         return success;
 	}
 

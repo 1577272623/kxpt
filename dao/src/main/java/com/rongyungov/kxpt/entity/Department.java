@@ -1,5 +1,6 @@
 package com.rongyungov.kxpt.entity;
 
+import com.baomidou.mybatisplus.annotation.*;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -7,15 +8,12 @@ import java.io.Serializable;
 import lombok.experimental.Accessors;
 import org.springframework.format.annotation.DateTimeFormat;
 
-import  com.baomidou.mybatisplus.annotation.TableName;
-import  com.baomidou.mybatisplus.annotation.IdType;
 import  com.baomidou.mybatisplus.extension.activerecord.Model;
-import  com.baomidou.mybatisplus.annotation.TableId;
+
 import  java.time.LocalDateTime;
 import java.util.List;
 
 import  com.rongyungov.framework.base.BaseEntity;
-import  com.baomidou.mybatisplus.annotation.TableField;
 
 /**
  *code is far away from bug with the animal protecting
@@ -99,7 +97,7 @@ public class Department extends BaseEntity  implements Serializable {
 	 */
 	@ApiModelProperty("是否删除")
 	@TableField("is_delete")
-
+	@TableLogic
 	private String isDelete;
 
 	/**

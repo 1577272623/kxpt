@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.io.File;
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -125,6 +126,8 @@ public class DataListController extends BaseController<DataListService,DataList>
 	@PostMapping("/add")
     @ApiOperation(value="添加DataList")
     public Boolean add(@RequestBody DataList  dataList) {
+        LocalDateTime dateTime = LocalDateTime.now();
+        dataList.setCreatedTime(dateTime);
         Boolean success=service.save( dataList);
         return success;
 	}
@@ -147,6 +150,8 @@ public class DataListController extends BaseController<DataListService,DataList>
         try {
             String url = "/" + fileType + "/" + fileName;
             dataList.setFile(url);
+            LocalDateTime dateTime = LocalDateTime.now();
+            dataList.setCreatedTime(dateTime);
             Boolean success = service.save(dataList);
             if (success){
                 multipartFile.transferTo(d);
