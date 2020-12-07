@@ -8,6 +8,8 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
                 import  com.rongyungov.framework.base.BaseController;
@@ -40,7 +42,15 @@ public class ExamController extends BaseController<ExamService,Exam> {
                                 ) throws InstantiationException, IllegalAccessException {
         Page<Exam> page=new Page<Exam>(pageIndex,pageSize);
         QueryWrapper<Exam> queryWrapper=exam.toWrapper(exam);
+        queryWrapper.orderByDesc("created_time");
         IPage<Exam> examIPage = service.page(page,queryWrapper);
+//        int i = Integer.parseInt(null);
+//        for (int j =0; j<examIPage.getRecords().size(); j++){
+//            i++;
+//            int s= (int) examIPage.getSize();
+//            int c= (int) (examIPage.getCurrent()-1);
+//            examIPage.getRecords().get(j).setNo(i+s*c);
+//        }
         return examIPage;
     }
 
@@ -114,8 +124,11 @@ public class ExamController extends BaseController<ExamService,Exam> {
 	@PostMapping("/add")
     @ApiOperation(value="添加Exam")
     public Boolean add(@RequestBody Exam  exam) {
-        Boolean success=service.save( exam);
+        Boolean success =false;
+        LocalDateTime dateTime = LocalDateTime.now();
+        exam.setCreatedTime(dateTime);
+        success=service.save(exam);
         return success;
-	}
+    }
 
 }

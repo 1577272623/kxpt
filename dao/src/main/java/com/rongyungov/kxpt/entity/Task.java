@@ -41,8 +41,10 @@ public class Task extends BaseEntity  implements Serializable {
 	 * 编号
 	 */
 	@ApiModelProperty("编号 no")
+
 	@TableId(value="no")
 	@TableField(exist = false)
+
 	private Integer no;
 
 	/**
@@ -74,7 +76,7 @@ public class Task extends BaseEntity  implements Serializable {
 	 */
 	@ApiModelProperty("结束时间")
 	@TableField("over_time")
-
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
 	private String overTime;
 
 	/**
@@ -147,7 +149,7 @@ public class Task extends BaseEntity  implements Serializable {
 	 */
 	@ApiModelProperty("创建时间")
 	@TableField("created_time")
-
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
 	private LocalDateTime createdTime;
 
 	/**
@@ -163,7 +165,7 @@ public class Task extends BaseEntity  implements Serializable {
 	 */
 	@ApiModelProperty("更新时间")
 	@TableField("updated_time")
-
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
 	private LocalDateTime updatedTime;
 
 

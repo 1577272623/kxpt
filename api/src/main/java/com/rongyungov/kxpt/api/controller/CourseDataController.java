@@ -6,7 +6,6 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.rongyungov.kxpt.entity.CourseList;
 import com.rongyungov.kxpt.entity.Teacher;
 import com.rongyungov.kxpt.service.CourseListService;
-import com.sun.org.apache.bcel.internal.generic.NEW;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -61,10 +60,9 @@ public class CourseDataController extends BaseController<CourseDataService,Cours
     @GetMapping("/get/{id}")
     @ApiOperation(value = "通过id获取CourseData")
     public CourseData getCourseDataById(@PathVariable Long id) {
-        QueryWrapper<CourseList> QueryWrapper = new QueryWrapper<CourseList>().eq("id",id);
-        List<CourseList> courseList=courseListService.list(QueryWrapper);
         CourseData courseData = new CourseData();
-        if (courseList!=null && courseList.size()!=0){
+        List<CourseList> courseLists = courseListService.list(new QueryWrapper<CourseList>().eq("id",id));
+        if (courseLists!=null&&courseLists.size()!=0){
              courseData=service.getOne(new QueryWrapper<CourseData>().eq("course_id",id));
         }
         return courseData;
@@ -78,7 +76,7 @@ public class CourseDataController extends BaseController<CourseDataService,Cours
      */
     @DeleteMapping("/delete/{id}")
     @ApiOperation(value = "通过id删除CourseData")
-    public Boolean delete(@PathVariable Long id) {
+    public Boolean delete(@PathVariable Long id){
         Boolean success=service.removeById(id);
         return success;
     }
@@ -127,10 +125,7 @@ public class CourseDataController extends BaseController<CourseDataService,Cours
 	@PostMapping("/add")
     @ApiOperation(value="添加CourseData")
     public Boolean add(@RequestBody CourseData  courseData) {
-	    Boolean success = false;
-	    if (courseData.getCourseId()!=null){
-            success=service.save(courseData);
-        }
+        Boolean success=service.save( courseData);
         return success;
 	}
 

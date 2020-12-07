@@ -3,7 +3,6 @@ package com.rongyungov.kxpt.api.controller;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.rongyungov.kxpt.Vo.courseListVo;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -61,6 +60,15 @@ public class CourseListController extends BaseController<CourseListService,Cours
                 ArrayList<CourseList> courseLists_c = (ArrayList<CourseList>) courseList1;
                 courseLists_c.sort(Comparator.comparing(CourseList::getSort).reversed());
                 department1.setChildren(courseLists_c);
+                //子集2
+                for (CourseList courseList2: courseLists_c ){
+                    List<CourseList> courseList3 =groupBy.get(String.valueOf(courseList2.getId()));
+                    if (!(courseList3 ==null)){
+                        ArrayList<CourseList> courseLists_c2 = (ArrayList<CourseList>) courseList3;
+                        courseLists_c2.sort(Comparator.comparing(CourseList::getSort).reversed());
+                        courseList2.setChildren(courseLists_c2);
+                    }
+                }
             }
             courseListList.add(department1);
         }
@@ -92,7 +100,6 @@ public class CourseListController extends BaseController<CourseListService,Cours
     @DeleteMapping("/delete/{id}")
     @ApiOperation(value = "通过id删除CourseList")
     public Boolean delete(@PathVariable Long id) {
-
         List<CourseList> courseLists = service.list(new QueryWrapper<CourseList>().eq("parentid",id));
         List<Long> ids=new ArrayList<>();
         ids.add(id);
@@ -148,6 +155,7 @@ public class CourseListController extends BaseController<CourseListService,Cours
 	@PostMapping("/add")
     @ApiOperation(value="添加CourseList")
     public Boolean add(@RequestBody CourseList  courseList) {
+
         Boolean success=service.save( courseList);
         return success;
 	}

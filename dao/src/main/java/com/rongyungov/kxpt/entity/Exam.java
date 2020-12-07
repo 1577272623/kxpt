@@ -188,7 +188,17 @@ public class Exam extends BaseEntity  implements Serializable {
 
 	private LocalDateTime updatedTime;
 
+	@ApiModelProperty("排序编号")
+	@TableField(exist = false)
+	private int no;
 
+	public int getNo() {
+		return no;
+	}
+
+	public void setNo(int no) {
+		this.no = no;
+	}
 
 	public Long getId() {
 		return id;

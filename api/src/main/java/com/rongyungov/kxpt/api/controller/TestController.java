@@ -5,14 +5,21 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.rongyungov.framework.base.Result;
 import com.rongyungov.kxpt.entity.CourseList;
+import com.rongyungov.kxpt.entity.Task;
 import com.rongyungov.kxpt.utils.ExcelUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.formula.functions.T;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
+
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -43,14 +50,57 @@ public class TestController extends BaseController<TestService,Test> {
      */
     @PostMapping("/list")
     @ApiOperation(value = "获取分页数据信息")
-    public IPage<Test> getTestList( @ApiParam(name="test",value="筛选条件") @RequestBody(required = false) Test Test  ,
+    public IPage<Test> getTestList( @ApiParam(name="test",value="筛选条件") @RequestBody(required = false) Test test  ,
                                 @ApiParam(name="pageIndex",value="页数",required=true,defaultValue = "1")@RequestParam Integer pageIndex ,
                                 @ApiParam(name="pageSize",value="页大小",required=true,defaultValue = "10")@RequestParam Integer pageSize
                                 ) throws InstantiationException, IllegalAccessException {
         Page<Test> page=new Page<Test>(pageIndex,pageSize);
-        QueryWrapper<Test> queryWrapper=Test.toWrapper(Test);
-        IPage<Test> courseListIPage = service.page(page,queryWrapper);
-        return courseListIPage;
+        Test test1 = new Test();
+        test1.setKeno(test.getKeno());
+//        QueryWrapper<Test> queryWrapper=Test.toWrapper(Test);
+        QueryWrapper<Test> objectQueryWrapper = new QueryWrapper<Test>(test1);
+        int i =0;
+        IPage<Test> taskPage = service.page(page,objectQueryWrapper);
+        for (int j =0; j<taskPage.getRecords().size(); j++){
+            i++;
+            int s= (int) taskPage.getSize();
+            int c= (int) (taskPage.getCurrent()-1);
+            taskPage.getRecords().get(j).setNo(i+s*c);
+        }
+        return taskPage;
+    }
+
+    /**
+     * @description : 获取分页列表
+     * ---------------------------------
+     * @author : li
+     * @since : Create in 2020-11-11
+     */
+    @PostMapping("/listAll")
+    @ApiOperation(value = "按条件获取数据信息")
+    public Map<String,Object> getTestListAll( @ApiParam(name="test",value="筛选条件") @RequestBody(required = false) long id) {
+        Map<String,Object> testMap = new HashMap<>();
+        List<Test> testList1 = service.list(new QueryWrapper<Test>().eq("keno",id));
+        List<Test> testList = new ArrayList<>();
+        List<Test> testList2 = new ArrayList<>();
+        List<Test> testList3 = new ArrayList<>();
+        List<Test> testList4 = new ArrayList<>();
+        for (Test test:testList1){
+            if (test.getStType().equals("1")){
+                testList.add(test);
+                testMap.put("1",testList);
+            }else if (test.getStType().equals("2")){
+                testList2.add(test);
+                testMap.put("2",testList2);
+            }else if (test.getStType().equals("3")){
+                testList3.add(test);
+                testMap.put("3",testList3);
+            }else{
+                testList4.add(test);
+                testMap.put("4",testList4);
+            }
+        }
+        return testMap;
     }
 
     /**
@@ -123,64 +173,73 @@ public class TestController extends BaseController<TestService,Test> {
 	@PostMapping("/add")
     @ApiOperation(value="添加Test")
     public Boolean add(@RequestBody Test  test) {
-        Boolean success=service.save(test);
+        Test test1 = new Test();
+        Boolean success = false;
+        if (test.getStType()!=null&&test.getKeno()!=null){
+            success=service.save(test);
+        }
         return success;
 	}
+
     /**
      * 试题上传
      */
     @PostMapping("/testImport")
     @ApiOperation(value = "试题导入")
     @Transactional
-    public Result testImport(MultipartFile excel) throws Exception {
+    public Result testImport(MultipartFile excel,String id) throws Exception {
+        String keno = id;
+        //模拟数据
+        InputStream in = excel.getInputStream();
+        XSSFWorkbook work = new XSSFWorkbook(in);
         int fail = 0, success = 0;
         StringBuffer sb = new StringBuffer();
-
-        List<String[]> mapList = ExcelUtils.readExcel(String.valueOf(excel), 0);
-        for (int i = 0; i < mapList.size(); i++) {
+        XSSFSheet Sheet1 = work.getSheet("Sheet1");
+        for (int i = 1; i < Sheet1.getLastRowNum()+1; i++) {
             try {
                 success++;
                 Test test1 = new Test();
-                String[] test2 = mapList.get(i);
-                if (test2[0].equalsIgnoreCase("判断题") || test2[0].equalsIgnoreCase("填空题")) {
-                    if (test2[0].equalsIgnoreCase("判断题")) {
-                        test1.setStType("1");
-                    } else {
-                        test1.setStType("4");
-                    }
-                    test1.setStContent(test2[1]);
-                    test1.setStAnswer(test2[6]);
-                    if (!(test2[7] == null)) {
-                        test1.setAnalysis(test2[7]);
-                    }
-                    service.save(test1);
-                } else if (test2[0].equalsIgnoreCase("单选题") || test2[0].equalsIgnoreCase("多选题")) {
-                    if (test2[0].equalsIgnoreCase("单选题")) {
-                        test1.setStType("2");
-                    } else {
-                        test1.setStType("3");
-                    }
-                    test1.setStContent(test2[1]);
-                    test1.setAnswerA(test2[2]);
-                    test1.setAnswerB(test2[3]);
-                    test1.setAnswerC(test2[4]);
-                    test1.setAnswerD(test2[5]);
-                    test1.setStAnswer(test2[6]);
-                    if (!(test2[7] == null)) {
-                        test1.setAnalysis(test2[7]);
-                    }
-                    service.save(test1);
+                test1.setKeno(keno);
+                XSSFRow row = Sheet1.getRow(i);
+                    if (String.valueOf(row.getCell(0)).equalsIgnoreCase("判断题") || String.valueOf(row.getCell(0)).equalsIgnoreCase("填空题")) {
+                        if (String.valueOf(row.getCell(0)).equalsIgnoreCase("判断题")) {
+                            test1.setStType("1");
+                        } else {
+                            test1.setStType("4");
+                        }
+                        test1.setStContent(String.valueOf(row.getCell(1)));
+                        test1.setStAnswer(String.valueOf(row.getCell(6)));
+                        if (!(row.getCell(0) == null)) {
+                            test1.setAnalysis(String.valueOf(row.getCell(7)));
+                        }
+                        service.save(test1);
+                    } else if (String.valueOf(row.getCell(0)).equalsIgnoreCase("单选题") || String.valueOf(row.getCell(0)).equalsIgnoreCase("多选题")) {
+                        if (String.valueOf(row.getCell(0)).equalsIgnoreCase("单选题")) {
+                            test1.setStType("2");
+                        } else {
+                            test1.setStType("3");
+                        }
+                        test1.setStContent(String.valueOf(row.getCell(0)));
+                        test1.setAnswerA(String.valueOf(row.getCell(2)));
+                        test1.setAnswerB(String.valueOf(row.getCell(3)));
+                        test1.setAnswerC(String.valueOf(row.getCell(4)));
+                        test1.setAnswerD(String.valueOf(row.getCell(5)));
+                        test1.setStAnswer(String.valueOf(row.getCell(6)));
+                        if (!(row.getCell(7) == null)) {
+                            test1.setAnalysis(String.valueOf(row.getCell(7)));
+                        }
+                        service.save(test1);
                 }
-            } catch (Exception e) {
-                fail++;
+                } catch(Exception e){
+                    fail++;
 //                sb.append("<br>试题：" + test1 + "，&nbsp;&nbsp;");
 //                sb.append("失败原因：");
-                sb.append(e.getMessage() + "");
+                    sb.append(e.getMessage() + "");
+                }
             }
-        }
         Map<String, Object> map = new HashMap<>();
         StringBuffer stringBuffer = new StringBuffer();
-        stringBuffer.append("成功导入" + (success - fail) + "条记录 ， 失败：" + fail + "条记录<br>");
+        stringBuffer.append("成功导入" + (success - fail) + "条记录， 失败：" + fail + "条记录<br>");
         if (fail > 0) {
             stringBuffer.append("失败的信息为：");
             map.put("fail", fail);
@@ -190,7 +249,6 @@ public class TestController extends BaseController<TestService,Test> {
         stringBuffer.append(sb.toString());
         String msg = stringBuffer.toString();
         map.put("msg", msg);
-
         return Result.ok(map);
     }
 

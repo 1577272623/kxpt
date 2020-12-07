@@ -1,22 +1,28 @@
 package com.rongyungov.kxpt.entity;
 
-import com.baomidou.mybatisplus.annotation.*;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModelProperty;
-
+import lombok.Data;
 import java.io.Serializable;
+import lombok.experimental.Accessors;
+import org.springframework.format.annotation.DateTimeFormat;
 
+import  com.baomidou.mybatisplus.annotation.TableName;
+import  com.baomidou.mybatisplus.annotation.IdType;
+import  com.baomidou.mybatisplus.extension.activerecord.Model;
+import  com.baomidou.mybatisplus.annotation.TableId;
+import  java.time.LocalDateTime;
 import java.util.List;
 
-import  java.time.LocalDateTime;
 import  com.rongyungov.framework.base.BaseEntity;
+import  com.baomidou.mybatisplus.annotation.TableField;
 
 /**
  *code is far away from bug with the animal protecting
  *   @description : Department 实体类
  *   ---------------------------------
  * 	 @author li
- *   @since 2020-11-24
+ *   @since 2020-12-02
  */
 @TableName("department")
 public class Department extends BaseEntity  implements Serializable {
@@ -83,7 +89,7 @@ public class Department extends BaseEntity  implements Serializable {
 	/**
 	 * 是否使用
 	 */
-	@ApiModelProperty("是否使用 1启用 0不启用 默认启用")
+	@ApiModelProperty("是否使用")
 	@TableField("is_use")
 
 	private String isUse;
@@ -93,7 +99,7 @@ public class Department extends BaseEntity  implements Serializable {
 	 */
 	@ApiModelProperty("是否删除")
 	@TableField("is_delete")
-	@TableLogic
+
 	private String isDelete;
 
 	/**
@@ -141,7 +147,7 @@ public class Department extends BaseEntity  implements Serializable {
 	 */
 	@ApiModelProperty("创建时间")
 	@TableField("created_time")
-	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+
 	private LocalDateTime createdTime;
 
 	/**
@@ -157,11 +163,11 @@ public class Department extends BaseEntity  implements Serializable {
 	 */
 	@ApiModelProperty("更新时间")
 	@TableField("updated_time")
-	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+
 	private LocalDateTime updatedTime;
 
 	@TableField(exist = false)
-	private  List<Department> children;
+	private List<Department> children;
 
 	public List<Department> getChildren() {
 		return children;
