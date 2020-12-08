@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.rongyungov.framework.base.Result;
 import com.rongyungov.framework.common.StringUtil;
 import com.rongyungov.kxpt.entity.CourseList;
+import com.rongyungov.kxpt.entity.Department;
 import com.rongyungov.kxpt.entity.Task;
 import com.rongyungov.kxpt.utils.ExcelUtils;
 import io.swagger.annotations.Api;
@@ -56,17 +57,16 @@ public class TestController extends BaseController<TestService,Test> {
                                 @ApiParam(name="pageSize",value="页大小",required=true,defaultValue = "10")@RequestParam Integer pageSize
                                 ) throws InstantiationException, IllegalAccessException {
         Page<Test> page=new Page<Test>(pageIndex,pageSize);
-        Test test1 = new Test();
-        test1.setKeno(test.getKeno());
-        test1.setStType(test.getStType());
-        test1.setStContent(test.getStContent());
-        QueryWrapper<Test> objectQueryWrapper = new QueryWrapper<Test>(test1);
+//        QueryWrapper<Test> objectQueryWrapper = new QueryWrapper<>(new Test());
 
+        QueryWrapper<Test> objectQueryWrapper = new QueryWrapper<>(new Test());
         if(test != null && StringUtil.isNotBlank(test.getKeno())){
             objectQueryWrapper.eq("keno",test.getKeno());
-        }
-        else {
+        }else if (test != null && StringUtil.isNotBlank(test.getStContent())){
             objectQueryWrapper.like("st_content",test.getStContent());
+        }else {
+            objectQueryWrapper.like("st_type",test.getStType());
+
         }
 
         int i =0;
