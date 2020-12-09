@@ -1,21 +1,30 @@
 package com.rongyungov.kxpt.api.controller;
 
 
+import com.rongyungov.framework.base.Result;
 import com.rongyungov.kxpt.entity.Test;
 import com.rongyungov.kxpt.utils.ExcelUtils;
 import io.swagger.annotations.Api;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.poi.hssf.usermodel.*;
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.FillPatternType;
 import org.apache.poi.ss.usermodel.IndexedColors;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
+import org.apache.poi.xssf.usermodel.XSSFCell;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.List;
-import java.util.Map;
+import java.io.InputStream;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 @CrossOrigin("*")
 @RestController
@@ -27,26 +36,92 @@ public class ExcelController {
 
     /**
      * Excel导入
+     *
      * @param file
      * @return
      */
     @PostMapping("/readExcel")
-    public List<String[]> readExcel(@RequestBody MultipartFile file){
-        String filePath = "c:\\kxpt\\upload\\excel\\Book1.xlsx";
-        List<String[]> mapList = ExcelUtils.readExcel(String.valueOf(filePath), 0);
-//        log.info("mapList:" + mapList);
-//        System.out.print(mapList);
-        return mapList;
+    public Result readExcel(@RequestBody MultipartFile file) {
+            try {
+                // 获得工作簿
+                //本地文件
+                InputStream is = file.getInputStream();
+                //File file=new File("");
+                // Workbook workbook = WorkbookFactory.create(file);
+                // 获得工作表个数
+                XSSFWorkbook xssfWorkbook = new XSSFWorkbook(is);
+                int sheetCount = xssfWorkbook.getNumberOfSheets();
+                Map<String, Object> stringObjectMap = new HashMap<>();
+                // 遍历工作表
+                String sheetname;
+                for (int i = 0; i < sheetCount; i++) {
+                    List sheetList = new ArrayList();
+                    sheetname = xssfWorkbook.getSheetName(i);
+
+                    //储存行的List
+                    List rowList = new ArrayList();
+                    XSSFSheet sheet = xssfWorkbook.getSheetAt(i);
+                    // 获得行数
+                    int rows = sheet.getLastRowNum() + 1;
+                    // 获得列数，先获得一行，在得到该行列数
+                    Row tmp = sheet.getRow(i);
+                    if (tmp == null) {
+                        sheetList.add(i, null);
+                        continue;
+                    }
+                    int cols = tmp.getPhysicalNumberOfCells();
+                    // 读取数据
+                    for (int row = 0; row < rows; row++) {
+                        //储存列的数据
+                        List coluList = new ArrayList();
+                        Row r = sheet.getRow(row);
+                        for (int col = 0; col < cols; col++) {
+                            if (r != null) {
+                                if (r.getCell(col) != null) {
+                                    Object value = null;
+                                    if (r.getCell(col).getCellType() == HSSFCell.CELL_TYPE_NUMERIC && HSSFDateUtil.isCellDateFormatted(r.getCell(col))) {
+                                        Date date = r.getCell(col).getDateCellValue();
+                                        //装换为时间格式
+                                        String formatDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(date);
+                                        value = formatDate;
+                                    } else {
+                                        r.getCell(col).setCellType(1);
+                                        value = r.getCell(col).getStringCellValue();
+                                    }
+                                    coluList.add(col, value);
+                                } else {
+                                    coluList.add(col, null);
+                                }
+                            } else {
+                                coluList.add(col, null);
+                            }
+                        }
+                        rowList.add(row, coluList);
+                    }
+                    sheetList.add(i, rowList);
+                    stringObjectMap.put(sheetname,rowList);
+                }
+//                System.out.println(sheetList);
+
+                return Result.ok(stringObjectMap);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        return null;
+
+
     }
 
 
-    /**
+
+
+        /**
      * Excel表格导出接口
      * http://localhost:8080/ExcelDownload
      * @param response response对象
      * @throws IOException 抛IO异常
      */
-    @RequestMapping("/ExcelDownload")
+    @PostMapping("/ExcelDownload")
     public void excelDownload(HttpServletResponse response) throws IOException {
         //表头数据
         String[] header = {"姓名", "工号", "性别", "出生日期", "身份证号码", "婚姻状况","民族","籍贯","政治面貌","电子邮件","电话号码","联系地址","所属部门","职位","职称","聘用形式","入职日期","转正日期","合同起始日期","合同截止日期","合同期限","最高学历"};

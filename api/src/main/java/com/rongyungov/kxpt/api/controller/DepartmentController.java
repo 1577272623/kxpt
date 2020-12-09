@@ -45,7 +45,6 @@ public class DepartmentController extends BaseController<DepartmentService,Depar
                                 @ApiParam(name="pageSize",value="页大小",required=true,defaultValue = "10")@RequestParam Integer pageSize
                                 ) throws InstantiationException, IllegalAccessException {
         Page<Department> page=new Page<Department>(pageIndex,pageSize);
-//        QueryWrapper<Department> queryWrapper = new QueryWrapper<>(department);
         QueryWrapper<Department> queryWrapper = new QueryWrapper<>(new Department());
         if(department != null && StringUtil.isNotBlank(department.getParentId())){
             queryWrapper.eq("parent_id",department.getParentId());

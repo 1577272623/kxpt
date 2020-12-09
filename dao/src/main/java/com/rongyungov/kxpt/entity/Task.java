@@ -63,6 +63,15 @@ public class Task extends BaseEntity  implements Serializable {
 
 	private String operation;
 
+
+	/**
+	 * 1 普通任务 2 聚合任务 默认普通
+	 */
+	@ApiModelProperty("1 普通任务 2 聚合任务 默认普通")
+	@TableField("type")
+
+	private String type;
+
 	/**
 	 * 描述
 	 */

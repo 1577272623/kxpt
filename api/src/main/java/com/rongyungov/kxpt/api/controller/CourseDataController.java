@@ -6,7 +6,6 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.rongyungov.framework.base.Result;
 import com.rongyungov.kxpt.entity.CourseList;
 import com.rongyungov.kxpt.entity.DataList;
-import com.rongyungov.kxpt.entity.Teacher;
 import com.rongyungov.kxpt.service.CourseListService;
 import com.rongyungov.kxpt.service.DataListService;
 import io.swagger.annotations.Api;
@@ -14,7 +13,6 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import net.bytebuddy.implementation.bytecode.Throw;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -22,7 +20,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import  com.rongyungov.framework.base.BaseController;
     import com.rongyungov.kxpt.service.CourseDataService;
@@ -78,22 +75,29 @@ public class CourseDataController extends BaseController<CourseDataService,Cours
         Map<String,Object> remap = new HashMap<>();
         List<CourseList> courseLists = courseListService.list(new QueryWrapper<CourseList>().eq("id",id));
         if (courseLists!=null&&courseLists.size()!=0){
+            List<DataList> video = new ArrayList<>();
+            List<DataList> ke_datalist = new ArrayList<>();
              courseData=service.getOne(new QueryWrapper<CourseData>().eq("course_id",id));
-             String stringvideo = courseData.getVideo();
-            ArrayList<String> videoList =  new ArrayList<>();
-             String[] stringvideoList = stringvideo.split(",");
-            for (int i=0; i<stringvideoList.length; i++){
-                videoList.add(stringvideoList[i]);
-            }
-            List<DataList> video = dataListService.list(new QueryWrapper<DataList>().in("id",videoList));
+             if (courseData.getVideo()!=null){
 
-            String stringcoursedata = courseData.getData();
-            ArrayList<String> data =  new ArrayList<>();
-            String[] stringcoursedatalist = stringcoursedata.split(",");
-            for (int i=0; i<stringcoursedatalist.length; i++){
-                data.add(stringcoursedatalist[i]);
-            }
-            List<DataList> ke_datalist = dataListService.list(new QueryWrapper<DataList>().in("id",data));
+                 String stringvideo = courseData.getVideo();
+                 ArrayList<String> videoList =  new ArrayList<>();
+                 String[] stringvideoList = stringvideo.split(",");
+                 for (int i=0; i<stringvideoList.length; i++){
+                     videoList.add(stringvideoList[i]);
+                 }
+                 video = dataListService.list(new QueryWrapper<DataList>().in("id",videoList));
+
+             }
+           if (courseData.getData()!=null){
+               String stringcoursedata = courseData.getData();
+               ArrayList<String> data =  new ArrayList<>();
+               String[] stringcoursedatalist = stringcoursedata.split(",");
+               for (int i=0; i<stringcoursedatalist.length; i++){
+                   data.add(stringcoursedatalist[i]);
+               }
+               ke_datalist = dataListService.list(new QueryWrapper<DataList>().in("id",data));
+           }
             remap.put("video",video);
             remap.put("ke_datalist",ke_datalist);
 
@@ -159,7 +163,13 @@ public class CourseDataController extends BaseController<CourseDataService,Cours
      */
 	@PostMapping("/add")
     @ApiOperation(value="添加CourseData")
-    public Boolean add(@RequestBody CourseData courseData) {
+    public Boolean add(@RequestBody CourseData courseData) throws Exception {
+	    List<CourseData> courseDataList = service.list(new QueryWrapper<>());
+	    for (CourseData courseData1 :courseDataList){
+	        if (courseData1.getCourseId().equals(courseData.getCourseId())){
+	            throw new Exception("该课程已存在！");
+            }
+        }
         LocalDateTime dateTime = LocalDateTime.now();
         courseData.setCreatedTime(dateTime);
         Boolean success=service.save( courseData);

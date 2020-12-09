@@ -288,6 +288,7 @@ public class TestController extends BaseController<TestService,Test> {
      */
     @PostMapping("/testImport")
     @ApiOperation(value = "试题导入")
+    @Transactional
     public Result testImport(@RequestBody(required = false) List<Test> testList){
         int fail = 0, success = 0;
         if (testList!=null&& testList.size()!=0){

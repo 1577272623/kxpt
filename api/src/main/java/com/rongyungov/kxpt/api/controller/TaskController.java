@@ -136,4 +136,20 @@ public class TaskController extends BaseController<TaskService,Task> {
         success=service.save(task);
         return success;
 	}
+
+//    /**
+//     * @description : 推送Task
+//     * ---------------------------------
+//     * @author : li
+//     * @since : Create in 2020-11-25
+//     */
+//    @PostMapping("/add")
+//    @ApiOperation(value="添加Task")
+//    public Boolean add(@RequestBody Task  task) {
+//        Boolean success =false;
+//        LocalDateTime dateTime = LocalDateTime.now();
+//        task.setCreatedTime(dateTime);
+//        success=service.save(task);
+//        return success;
+//    }
 }

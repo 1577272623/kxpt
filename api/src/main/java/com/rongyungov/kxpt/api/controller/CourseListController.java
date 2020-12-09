@@ -3,11 +3,16 @@ package com.rongyungov.kxpt.api.controller;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.rongyungov.kxpt.entity.CourseData;
+import com.rongyungov.kxpt.entity.DataList;
+import com.rongyungov.kxpt.service.CourseDataService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -26,6 +31,9 @@ import  com.rongyungov.kxpt.entity.CourseList;
 @Api(value="/courseList", description="CourseList 控制器")
 @RequestMapping("/courseList")
 public class CourseListController extends BaseController<CourseListService,CourseList> {
+
+    @Autowired
+    CourseDataService courseDataService;
 
     /**
      * @description : 获取分页列表
@@ -155,8 +163,13 @@ public class CourseListController extends BaseController<CourseListService,Cours
 	@PostMapping("/add")
     @ApiOperation(value="添加CourseList")
     public Boolean add(@RequestBody CourseList  courseList) {
-
-        Boolean success=service.save( courseList);
+	    Boolean success;
+        LocalDateTime dateTime = LocalDateTime.now();
+        courseList.setCreatedTime(dateTime);
+        success=service.save(courseList);
+        CourseData courseData = new CourseData();
+        courseData.setCourseId(Math.toIntExact(courseList.getId()));
+        success=courseDataService.save(courseData);
         return success;
 	}
 

@@ -3,17 +3,23 @@ package com.rongyungov.kxpt.api.controller;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.rongyungov.kxpt.entity.DataList;
 import com.rongyungov.kxpt.entity.Task;
+import com.rongyungov.kxpt.service.DataListService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-                import  com.rongyungov.framework.base.BaseController;
+import java.util.Map;
+
+import  com.rongyungov.framework.base.BaseController;
     import com.rongyungov.kxpt.service.NoticeService;
 import  com.rongyungov.kxpt.entity.Notice;
 
@@ -28,6 +34,9 @@ import  com.rongyungov.kxpt.entity.Notice;
 @Api(value="/notice", description="Notice 公告 控制器")
 @RequestMapping("/notice")
 public class NoticeController extends BaseController<NoticeService,Notice> {
+
+    @Autowired
+    DataListService dataListService;
 
     /**
      * @description : 获取分页列表
@@ -63,9 +72,22 @@ public class NoticeController extends BaseController<NoticeService,Notice> {
      */
     @GetMapping("/get/{id}")
     @ApiOperation(value = "通过id获取Notice")
-    public Notice getNoticeById(@PathVariable Long id) {
+    public Map<String,Object> getNoticeById(@PathVariable Long id) {
         Notice notice=service.getById(id);
-        return notice;
+        Map<String, Object> map = new HashMap<>();
+        if (notice.getFile()!=null){
+            String file = notice.getFile();
+            ArrayList<String> fileList =  new ArrayList<>();
+            String[] stringvideoList = file.split(",");
+            for (int i=0; i<stringvideoList.length; i++){
+                fileList.add(stringvideoList[i]);
+            }
+            List<DataList> dataList = dataListService.list(new QueryWrapper<DataList>().in("id",fileList));
+
+            map.put("file",dataList);
+            map.put("notice",notice);
+        }
+        return map;
     }
 
     /**

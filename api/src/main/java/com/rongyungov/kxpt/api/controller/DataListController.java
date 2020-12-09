@@ -139,11 +139,27 @@ public class DataListController extends BaseController<DataListService,DataList>
         Map<String,Object> reMap = new HashMap<>();
 //        String fileName = FileUtils.randomNameFile(multipartFile);
         String fileName = multipartFile.getOriginalFilename();
+        String excal = "/imgs/excel.png";
+        String ppt = "/imgs/ppt.png";
+        String word = "/imgs/word.png";
         dataList.setName(fileName);
         String filePath = this.defaultpath;
         String fileType = "imgs";
+        //获取文件的后缀名
+        String suffix = fileName.substring(fileName.lastIndexOf("."));
         if (!FileUtils.isImage(fileName)) {
-            fileType = "file";
+            if (suffix.equals(".xls")||suffix.equalsIgnoreCase(".xlsx")){
+                dataList.setPhoto(excal);
+                fileType = "excel";
+            }else if (suffix.equals(".doc")||suffix.equalsIgnoreCase(".docx")){
+                dataList.setPhoto(word);
+                fileType = "word";
+            }else if(suffix.equals(".pptx")||suffix.equalsIgnoreCase(".ppt")){
+                dataList.setPhoto(ppt);
+                fileType = "ppt";
+            }else {
+                fileType = "file";
+            }
         }
         dataList.setType(fileType);
         File d = new File(filePath + "/" + fileType + "/" + fileName);
