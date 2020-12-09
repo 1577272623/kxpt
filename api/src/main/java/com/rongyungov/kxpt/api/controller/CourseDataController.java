@@ -3,20 +3,28 @@ package com.rongyungov.kxpt.api.controller;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.rongyungov.framework.base.Result;
 import com.rongyungov.kxpt.entity.CourseList;
+import com.rongyungov.kxpt.entity.DataList;
 import com.rongyungov.kxpt.entity.Teacher;
 import com.rongyungov.kxpt.service.CourseListService;
+import com.rongyungov.kxpt.service.DataListService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import net.bytebuddy.implementation.bytecode.Throw;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-                import  com.rongyungov.framework.base.BaseController;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import  com.rongyungov.framework.base.BaseController;
     import com.rongyungov.kxpt.service.CourseDataService;
 import  com.rongyungov.kxpt.entity.CourseData;
 
@@ -34,6 +42,10 @@ public class CourseDataController extends BaseController<CourseDataService,Cours
 
     @Autowired
     CourseListService courseListService;
+
+    @Autowired
+    DataListService dataListService;
+
     /**
      * @description : 获取分页列表
      * ---------------------------------
@@ -61,13 +73,34 @@ public class CourseDataController extends BaseController<CourseDataService,Cours
      */
     @GetMapping("/get/{id}")
     @ApiOperation(value = "通过id获取CourseData")
-    public CourseData getCourseDataById(@PathVariable Long id) {
+    public Result getCourseDataById(@PathVariable Long id) throws Exception {
         CourseData courseData = new CourseData();
+        Map<String,Object> remap = new HashMap<>();
         List<CourseList> courseLists = courseListService.list(new QueryWrapper<CourseList>().eq("id",id));
         if (courseLists!=null&&courseLists.size()!=0){
              courseData=service.getOne(new QueryWrapper<CourseData>().eq("course_id",id));
+             String stringvideo = courseData.getVideo();
+            ArrayList<String> videoList =  new ArrayList<>();
+             String[] stringvideoList = stringvideo.split(",");
+            for (int i=0; i<stringvideoList.length; i++){
+                videoList.add(stringvideoList[i]);
+            }
+            List<DataList> video = dataListService.list(new QueryWrapper<DataList>().in("id",videoList));
+
+            String stringcoursedata = courseData.getData();
+            ArrayList<String> data =  new ArrayList<>();
+            String[] stringcoursedatalist = stringcoursedata.split(",");
+            for (int i=0; i<stringcoursedatalist.length; i++){
+                data.add(stringcoursedatalist[i]);
+            }
+            List<DataList> ke_datalist = dataListService.list(new QueryWrapper<DataList>().in("id",data));
+            remap.put("video",video);
+            remap.put("ke_datalist",ke_datalist);
+
+        }else {
+            throw new Exception("课程资料信息为空!");
         }
-        return courseData;
+        return Result.ok(remap);
     }
 
     /**

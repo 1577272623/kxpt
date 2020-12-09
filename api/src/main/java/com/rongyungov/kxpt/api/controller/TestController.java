@@ -8,6 +8,7 @@ import com.rongyungov.framework.common.StringUtil;
 import com.rongyungov.kxpt.entity.CourseList;
 import com.rongyungov.kxpt.entity.Department;
 import com.rongyungov.kxpt.entity.Task;
+import com.rongyungov.kxpt.service.CourseListService;
 import com.rongyungov.kxpt.utils.ExcelUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -17,6 +18,7 @@ import org.apache.poi.ss.formula.functions.T;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
@@ -26,6 +28,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import  com.rongyungov.framework.base.BaseController;
     import com.rongyungov.kxpt.service.TestService;
@@ -44,6 +48,9 @@ import org.springframework.web.multipart.MultipartFile;
 @RequestMapping("/test")
 public class TestController extends BaseController<TestService,Test> {
 
+    @Autowired
+    CourseListService courseListService;
+
     /**
      * @description : 获取分页列表
      * ---------------------------------
@@ -57,18 +64,31 @@ public class TestController extends BaseController<TestService,Test> {
                                 @ApiParam(name="pageSize",value="页大小",required=true,defaultValue = "10")@RequestParam Integer pageSize
                                 ) throws InstantiationException, IllegalAccessException {
         Page<Test> page=new Page<Test>(pageIndex,pageSize);
-//        QueryWrapper<Test> objectQueryWrapper = new QueryWrapper<>(new Test());
-
         QueryWrapper<Test> objectQueryWrapper = new QueryWrapper<>(new Test());
         if(test != null && StringUtil.isNotBlank(test.getKeno())){
-            objectQueryWrapper.eq("keno",test.getKeno());
-        }else if (test != null && StringUtil.isNotBlank(test.getStContent())){
-            objectQueryWrapper.like("st_content",test.getStContent());
-        }else {
-            objectQueryWrapper.like("st_type",test.getStType());
-
+            ArrayList<String> kenoList = new ArrayList<>();
+            kenoList.add(test.getKeno());
+            List<CourseList> courseLists = courseListService.list(new QueryWrapper<CourseList>(new CourseList()));
+            Map<String, List<CourseList>> groupBy = courseLists.stream().collect(Collectors.groupingBy(CourseList::getParentid));
+            List<CourseList> courseList =groupBy.get(String.valueOf(test.getKeno()));
+            if (courseList!=null&& courseList.size()!=0){
+                for (CourseList courseList1 : courseList){
+                    kenoList.add(String.valueOf(courseList1.getId()));//添加二级目录的题目
+                    List<CourseList> courseList2 =groupBy.get(String.valueOf(courseList1.getId()));
+                    if (courseList2!=null&& courseList2.size()!=0){
+                        for (CourseList courseList3 : courseList2){
+                              kenoList.add(String.valueOf(courseList3.getId()));  //添加二级目录的题目
+                        }
+                    }
+                }
+            }
+            objectQueryWrapper.in("keno",kenoList);
         }
-
+        if (test != null && StringUtil.isNotBlank(test.getStContent())){
+            objectQueryWrapper.like("st_content",test.getStContent());
+        }if (test != null && StringUtil.isNotBlank(test.getStType())){
+            objectQueryWrapper.eq("st_type",test.getStType());
+        }
         int i =0;
         IPage<Test> taskPage = service.page(page,objectQueryWrapper);
         for (int j =0; j<taskPage.getRecords().size(); j++){
@@ -95,7 +115,6 @@ public class TestController extends BaseController<TestService,Test> {
         List<Test> testList2 = new ArrayList<>();
         List<Test> testList3 = new ArrayList<>();
         List<Test> testList4 = new ArrayList<>();
-//        int
         for (Test test:testList1){
             if (test.getStType().equals("1")){
                 testList.add(test);
@@ -225,7 +244,6 @@ public class TestController extends BaseController<TestService,Test> {
                         test1.setAnalysis(String.valueOf(row.getCell(7)));
                     }
                     testList.add(test1);
-//                    service.save(test1);
                 } else if (String.valueOf(row.getCell(0)).equalsIgnoreCase("单选题") || String.valueOf(row.getCell(0)).equalsIgnoreCase("多选题")) {
                     if (String.valueOf(row.getCell(0)).equalsIgnoreCase("单选题")) {
                         test1.setStType("2");
@@ -242,7 +260,6 @@ public class TestController extends BaseController<TestService,Test> {
                         test1.setAnalysis(String.valueOf(row.getCell(7)));
                     }
                     testList.add(test1);
-//                    service.save(test1);
                 }
             } catch(Exception e){
                 fail++;
@@ -271,15 +288,17 @@ public class TestController extends BaseController<TestService,Test> {
      */
     @PostMapping("/testImport")
     @ApiOperation(value = "试题导入")
-    @Transactional
-    public Result testImport(List<Test> testList) throws Exception {
+    public Result testImport(@RequestBody(required = false) List<Test> testList){
         int fail = 0, success = 0;
-        for (Test test:testList){
-            boolean b = service.save(test);
-            if (b){
-                success++;
-            }else fail++;
+        if (testList!=null&& testList.size()!=0){
+            for (Test test:testList){
+                boolean b = service.save(test);
+                if (b){
+                    success++;
+                }else fail++;
+            }
         }
+
         Map<String, Object> map = new HashMap<>();
         StringBuffer stringBuffer = new StringBuffer();
         stringBuffer.append("成功读取" + success  + "条记录， 失败：" + fail + "条记录<br>");
@@ -287,4 +306,5 @@ public class TestController extends BaseController<TestService,Test> {
         map.put("msg", msg);
         return Result.ok(map);
     }
+
 }

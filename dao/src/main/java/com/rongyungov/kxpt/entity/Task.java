@@ -56,6 +56,14 @@ public class Task extends BaseEntity  implements Serializable {
 	private String name;
 
 	/**
+	 * 任务具体操作
+	 */
+	@ApiModelProperty("任务具体操作")
+	@TableField("operation")
+
+	private String operation;
+
+	/**
 	 * 描述
 	 */
 	@ApiModelProperty("描述")
@@ -167,6 +175,7 @@ public class Task extends BaseEntity  implements Serializable {
 	@TableField("updated_time")
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
 	private LocalDateTime updatedTime;
+
 
 
 	public Integer getNo() {

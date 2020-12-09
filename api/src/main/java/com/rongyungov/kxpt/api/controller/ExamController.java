@@ -97,6 +97,7 @@ public class ExamController extends BaseController<ExamService,Exam> {
             if (groupBytest.get(String.valueOf(department1.getId()))!=null){
                 department1.setTestnum(groupBytest.get(String.valueOf(department1.getId())).size());
                 int type1 = 0,type2 = 0, type3 = 0, type4 = 0, type5 = 0;
+                //各种类型题目的数量
                 for (Test test:groupBytest.get(String.valueOf(department1.getId()))){
                     if (test.getStType().equals("1")){
                         type1++;
