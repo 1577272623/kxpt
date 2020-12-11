@@ -52,13 +52,13 @@ public class NoticeController extends BaseController<NoticeService,Notice> {
                                 @ApiParam(name="pageSize",value="页大小",required=true,defaultValue = "10")@RequestParam Integer pageSize
                                 ) throws InstantiationException, IllegalAccessException {
         Page<Notice> page=new Page<Notice>(pageIndex,pageSize);
-        QueryWrapper<Notice> queryWrapper=notice.toWrapper(notice);
+        QueryWrapper<Notice> queryWrapper= new QueryWrapper<>(new Notice());
         queryWrapper.orderByDesc("created_time");
         if (notice.getSelectfirstTime() != null){
-            queryWrapper.le("created_time",notice.getSelectfirstTime());
+            queryWrapper.ge("created_time",notice.getSelectfirstTime());
         }
         if (notice.getSelectsecondTime() != null){
-            queryWrapper.lt("created_time",notice.getSelectfirstTime());
+            queryWrapper.le("created_time",notice.getSelectsecondTime());
         }
         int i =0;
         IPage<Notice> noticeIPage = service.page(page,queryWrapper);
@@ -159,5 +159,7 @@ public class NoticeController extends BaseController<NoticeService,Notice> {
         notice.setCreatedTime(dateTime);
         return success;
 	}
+
+
 
 }

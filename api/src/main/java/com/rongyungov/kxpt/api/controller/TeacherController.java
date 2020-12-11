@@ -8,8 +8,7 @@ import com.rongyungov.framework.entity.User;
 import com.rongyungov.framework.shiro.util.AesCipherUtil;
 import com.rongyungov.framework.shiro.util.JwtUtil;
 import com.rongyungov.kxpt.entity.*;
-import com.rongyungov.kxpt.service.DepTaskService;
-import com.rongyungov.kxpt.service.StudentService;
+import com.rongyungov.kxpt.service.*;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -28,7 +27,6 @@ import java.util.List;
 import java.util.Map;
 
 import  com.rongyungov.framework.base.BaseController;
-    import com.rongyungov.kxpt.service.TeacherService;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
@@ -53,6 +51,12 @@ public class TeacherController extends BaseController<TeacherService,Teacher> {
 
     @Autowired
     StudentService studentService;
+
+    @Autowired
+    DepartmentService departmentService;
+
+    @Autowired
+    DataListService dataListService;
 
     /**
      * @description : 获取分页列表
@@ -82,6 +86,10 @@ public class TeacherController extends BaseController<TeacherService,Teacher> {
     @ApiOperation(value = "通过id获取Teacher")
     public Teacher getTeacherById(@PathVariable Long id) {
         Teacher teacher=service.getById(id);
+        Department dep = departmentService.getById(teacher.getDepno());
+        teacher.setDepno(dep.getName());
+        DataList photo = dataListService.getById(teacher.getPhoto());
+        teacher.setPhoto(photo.getFile());
         return teacher;
     }
 
@@ -132,6 +140,7 @@ public class TeacherController extends BaseController<TeacherService,Teacher> {
         Boolean success=service.updateById(teacher);
         return success;
     }
+
 
     /**
      * @description : 添加Teacher

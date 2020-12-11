@@ -161,13 +161,11 @@ private static final long serialVersionUID = 1L;
 
 	@TableField(exist = false)
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-	@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	private LocalDateTime selectfirstTime;
 
 
 	@TableField(exist = false)
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-	@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	private LocalDateTime selectsecondTime;
 
 	public LocalDateTime getSelectfirstTime() {

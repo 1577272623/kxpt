@@ -3,16 +3,24 @@ package com.rongyungov.kxpt.api.controller;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.rongyungov.kxpt.entity.*;
+import com.rongyungov.kxpt.service.StudentService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import org.apache.velocity.runtime.directive.Foreach;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+
+import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-                import  com.rongyungov.framework.base.BaseController;
+import java.util.Map;
+
+import  com.rongyungov.framework.base.BaseController;
     import com.rongyungov.kxpt.service.GradeService;
-import  com.rongyungov.kxpt.entity.Grade;
 
 /**
  *code is far away from bug with the animal protecting
@@ -25,6 +33,9 @@ import  com.rongyungov.kxpt.entity.Grade;
 @Api(value="/grade", description="Grade 控制器")
 @RequestMapping("/grade")
 public class GradeController extends BaseController<GradeService,Grade> {
+
+    @Autowired
+    StudentService studentService;
 
     /**
      * @description : 获取分页列表
@@ -39,10 +50,32 @@ public class GradeController extends BaseController<GradeService,Grade> {
                                 @ApiParam(name="pageSize",value="页大小",required=true,defaultValue = "10")@RequestParam Integer pageSize
                                 ) throws InstantiationException, IllegalAccessException {
         Page<Grade> page=new Page<Grade>(pageIndex,pageSize);
-        QueryWrapper<Grade> queryWrapper=grade.toWrapper(grade);
+        QueryWrapper<Grade> queryWrapper=new QueryWrapper<>(new Grade());
+        queryWrapper.orderByDesc("grade");
+        if (grade.getDapartment() != null){
+            queryWrapper.eq("dapartment",grade.getDapartment());
+        }
+
+        if (grade.getType() != null){
+            queryWrapper.eq("type",grade.getType());
+        }
+        if (grade.getName() != null){
+            queryWrapper.eq("name",grade.getName());
+        }
         IPage<Grade> gradeIPage = service.page(page,queryWrapper);
+        List<Student> students = studentService.list(new QueryWrapper<Student>().eq("classno",grade.getDapartment()));
+        for (int j =0; j<gradeIPage.getRecords().size(); j++){
+            for (Student student: students){
+                if (String.valueOf(student.getId()).equals(gradeIPage.getRecords().get(j).getStudent())){
+                    gradeIPage.getRecords().get(j).setStudent(student.getName());
+                }
+            }
+
+        }
         return gradeIPage;
     }
+
+
 
     /**
      * @description : 通过id获取Grade
@@ -117,5 +150,19 @@ public class GradeController extends BaseController<GradeService,Grade> {
         Boolean success=service.save( grade);
         return success;
 	}
+
+    /**
+     * @description : 获取任务完成度
+     * ---------------------------------
+     * @author : li
+     * @since : Create in 2020-11-11
+     */
+    @PostMapping("/NewGradeRenking")
+    @ApiOperation(value = "教师首页获取成绩排名")
+    public Map<String,Object> getNewGradeRenking(@ApiParam(name="teacher",value="筛选条件") @RequestBody(required = false) Teacher teacher ) throws InstantiationException, IllegalAccessException {
+        return null;
+    }
+
+
 
 }

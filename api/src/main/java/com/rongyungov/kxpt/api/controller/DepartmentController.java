@@ -4,10 +4,14 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.rongyungov.framework.common.StringUtil;
+import com.rongyungov.framework.entity.User;
+import com.rongyungov.framework.service.UserService;
+import com.rongyungov.framework.shiro.util.JwtUtil;
 import com.rongyungov.kxpt.entity.Test;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.text.SimpleDateFormat;
@@ -20,6 +24,8 @@ import  com.rongyungov.framework.base.BaseController;
     import com.rongyungov.kxpt.service.DepartmentService;
 import  com.rongyungov.kxpt.entity.Department;
 
+import javax.servlet.http.HttpServletRequest;
+
 /**
  *code is far away from bug with the animal protecting
  *   @description : Department 控制器
@@ -31,6 +37,12 @@ import  com.rongyungov.kxpt.entity.Department;
 @Api(value="/department", description="Department 控制器")
 @RequestMapping("/department")
 public class DepartmentController extends BaseController<DepartmentService,Department> {
+
+    @Autowired
+    HttpServletRequest request;
+
+    @Autowired
+    UserService userService;
 
     /**
      * @description : 获取分页列表
@@ -148,6 +160,9 @@ public class DepartmentController extends BaseController<DepartmentService,Depar
 	    if (department.getParentId()!=null){
             LocalDateTime dateTime = LocalDateTime.now();
             department.setCreatedTime(dateTime);
+            String account = JwtUtil.getClaim(request.getHeader("Token"), "account");
+            User user = userService.getOne(new QueryWrapper<User>().eq("account",account));
+            department.setCreatedBy(String.valueOf(user.getId()));
             success=service.save( department);
         }else {
 	        throw new Exception("ParentId不能为空");

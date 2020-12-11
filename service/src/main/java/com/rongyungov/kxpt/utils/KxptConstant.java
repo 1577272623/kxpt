@@ -37,5 +37,25 @@ public class KxptConstant {
      * */
     public static final String DEPARTMENT_TYPE_BAN = "2";
 
+    /**
+     * 考试成绩
+     */
+    public static final String GRADE_TYPE_EXAM = "1";
+
+    /**
+     * 竞赛成绩
+     */
+    public static final String GRADE_TYPE_CONTEST = "2";
+
+    /**
+     * 任务成绩
+     */
+    public static final String GRADE_TYPE_TASK = "3";
+
+    /**
+     * 实训成绩
+     */
+    public static final String GRADE_TYPE_XUN = "4";
+
 
 }

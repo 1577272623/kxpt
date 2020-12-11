@@ -77,7 +77,7 @@ public class Grade extends BaseEntity  implements Serializable {
 	/**
 	 * 属性
 	 */
-	@ApiModelProperty("属性")
+	@ApiModelProperty("属性 1考试  2竞赛 3任务 4实训 ")
 	@TableField("type")
 
 	private String type;

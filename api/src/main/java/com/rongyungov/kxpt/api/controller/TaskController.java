@@ -4,11 +4,8 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.rongyungov.framework.base.Result;
-import com.rongyungov.kxpt.entity.DataList;
-import com.rongyungov.kxpt.entity.DepTask;
-import com.rongyungov.kxpt.entity.Test;
-import com.rongyungov.kxpt.service.DataListService;
-import com.rongyungov.kxpt.service.DepTaskService;
+import com.rongyungov.kxpt.entity.*;
+import com.rongyungov.kxpt.service.*;
 import com.rongyungov.kxpt.utils.ExcelUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -18,6 +15,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
+import java.text.DecimalFormat;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -25,8 +23,6 @@ import java.util.List;
 import java.util.Map;
 
 import  com.rongyungov.framework.base.BaseController;
-    import com.rongyungov.kxpt.service.TaskService;
-import  com.rongyungov.kxpt.entity.Task;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
@@ -46,6 +42,15 @@ public class TaskController extends BaseController<TaskService,Task> {
 
     @Autowired
     DepTaskService depTaskService;
+
+    @Autowired
+    DepartmentService departmentService;
+
+    @Autowired
+    GradeService gradeService;
+
+    @Autowired
+    StudentService studentService;
 
     /**
      * @description : 获取分页列表
@@ -172,19 +177,39 @@ public class TaskController extends BaseController<TaskService,Task> {
         return success;
 	}
 
-//    /**
-//     * @description : 推送Task
-//     * ---------------------------------
-//     * @author : li
-//     * @since : Create in 2020-11-25
-//     */
-//    @PostMapping("/add")
-//    @ApiOperation(value="添加Task")
-//    public Boolean add(@RequestBody Task  task) {
-//        Boolean success =false;
-//        LocalDateTime dateTime = LocalDateTime.now();
-//        task.setCreatedTime(dateTime);
-//        success=service.save(task);
-//        return success;
-//    }
+    /**
+     * @description : 获取任务完成度
+     * ---------------------------------
+     * @author : li
+     * @since : Create in 2020-11-11
+     */
+    @PostMapping("/taskDA")
+    @ApiOperation(value = "教师首页获取任务完成度")
+    public Map<String,Object> gettaskDA(@ApiParam(name="teacher",value="筛选条件") @RequestBody(required = false) Teacher teacher ) throws InstantiationException, IllegalAccessException {
+        List<Department> departmentList = departmentService.list(new QueryWrapper<Department>()
+                .ne("parent_id","0"));
+        List<Grade> grades = gradeService.list(new QueryWrapper<>());
+        List<Student> students = studentService.list(new QueryWrapper<>());
+        Map<String,Object> class_count = new HashMap<>();
+        for (Department department:departmentList){
+            if (department.getCreatedBy().equalsIgnoreCase(String.valueOf(teacher.getId()))){
+                int class_grade_count = 0,student_count = 0;
+                for (Student student:students){
+                    if (student.getClassno().equalsIgnoreCase(String.valueOf(department.getId()))){
+                        student_count++;
+                    }
+                }
+                for (Grade grade:grades){
+                    if (grade.getDapartment().equalsIgnoreCase(String.valueOf(department.getId()))){
+                        class_grade_count++;
+                    }
+                }
+                DecimalFormat df = new DecimalFormat("0.0000");
+                class_count.put(department.getName(),df.format((float)class_grade_count/student_count));
+            }
+        }
+
+        return class_count;
+    }
+
 }
