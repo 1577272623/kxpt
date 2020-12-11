@@ -71,6 +71,33 @@ public class ExamController extends BaseController<ExamService,Exam> {
     }
 
     /**
+     * @description : 获取分页列表
+     * ---------------------------------
+     * @author : li
+     * @since : Create in 2020-11-11
+     */
+    @PostMapping("/Contestlist")
+    @ApiOperation(value = "获取竞赛组卷分页数据信息")
+    public IPage<Exam> getContestList( @ApiParam(name="exam",value="筛选条件") @RequestBody(required = false) Exam exam  ,
+                                    @ApiParam(name="pageIndex",value="页数",required=true,defaultValue = "1")@RequestParam Integer pageIndex ,
+                                    @ApiParam(name="pageSize",value="页大小",required=true,defaultValue = "10")@RequestParam Integer pageSize
+    ) throws InstantiationException, IllegalAccessException {
+        Page<Exam> page=new Page<Exam>(pageIndex,pageSize);
+        exam.setIsContest("1");
+        QueryWrapper<Exam> queryWrapper=exam.toWrapper(exam);
+        queryWrapper.orderByDesc("created_time");
+        IPage<Exam> examIPage = service.page(page,queryWrapper);
+        int i = 0;
+        for (int j =0; j<examIPage.getRecords().size(); j++){
+            i++;
+            int s= (int) examIPage.getSize();
+            int c= (int) (examIPage.getCurrent()-1);
+            examIPage.getRecords().get(j).setNo(String.valueOf(i+s*c));
+        }
+        return examIPage;
+    }
+
+    /**
      * @description : 通过id获取Exam
      * ---------------------------------
      * @author : li

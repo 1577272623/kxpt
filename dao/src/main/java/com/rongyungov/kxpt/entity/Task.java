@@ -12,6 +12,9 @@ import  com.baomidou.mybatisplus.annotation.IdType;
 import  com.baomidou.mybatisplus.extension.activerecord.Model;
 import  com.baomidou.mybatisplus.annotation.TableId;
 import  java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
 import  com.baomidou.mybatisplus.annotation.TableLogic;
 import  com.rongyungov.framework.base.BaseEntity;
 import  com.baomidou.mybatisplus.annotation.TableField;
@@ -105,14 +108,6 @@ public class Task extends BaseEntity  implements Serializable {
 	private String isUse;
 
 	/**
-	 * 所属部門
-	 */
-	@ApiModelProperty("所属部門")
-	@TableField("class_no")
-
-	private String classNo;
-
-	/**
 	 * 是否删除
 	 */
 	@ApiModelProperty("是否删除")
@@ -185,7 +180,39 @@ public class Task extends BaseEntity  implements Serializable {
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
 	private LocalDateTime updatedTime;
 
+	@TableField(exist = false)
+	private List<DataList> task_file;
 
+	/**
+	 * 所属部門
+	 */
+	@ApiModelProperty("班级编号")
+	@TableField(exist = false)
+	private String classNo;
+
+	public List<DataList> getTask_file() {
+		return task_file;
+	}
+
+	public void setTask_file(List<DataList> task_file) {
+		this.task_file = task_file;
+	}
+
+	public String getOperation() {
+		return operation;
+	}
+
+	public void setOperation(String operation) {
+		this.operation = operation;
+	}
+
+	public String getType() {
+		return type;
+	}
+
+	public void setType(String type) {
+		this.type = type;
+	}
 
 	public Integer getNo() {
 		return no;

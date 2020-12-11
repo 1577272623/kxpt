@@ -4,11 +4,16 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.rongyungov.framework.base.Result;
+import com.rongyungov.kxpt.entity.DataList;
+import com.rongyungov.kxpt.entity.DepTask;
 import com.rongyungov.kxpt.entity.Test;
+import com.rongyungov.kxpt.service.DataListService;
+import com.rongyungov.kxpt.service.DepTaskService;
 import com.rongyungov.kxpt.utils.ExcelUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
@@ -36,6 +41,12 @@ import org.springframework.web.multipart.MultipartFile;
 @RequestMapping("/task")
 public class TaskController extends BaseController<TaskService,Task> {
 
+    @Autowired
+    DataListService dataListService;
+
+    @Autowired
+    DepTaskService depTaskService;
+
     /**
      * @description : 获取分页列表
      * ---------------------------------
@@ -53,11 +64,23 @@ public class TaskController extends BaseController<TaskService,Task> {
         queryWrapper.orderByDesc("created_time");
         int i =0;
         IPage<Task> taskPage = service.page(page,queryWrapper);
+        List<DataList> dataLists = dataListService.list(new QueryWrapper<>(new DataList()));
         for (int j =0; j<taskPage.getRecords().size(); j++){
             i++;
             int s= (int) taskPage.getSize();
             int c= (int) (taskPage.getCurrent()-1);
             taskPage.getRecords().get(j).setNo(i+s*c);
+            String fileids = taskPage.getRecords().get(j).getFile();
+            ArrayList<DataList> dataListss =  new ArrayList<>();
+            String[] stringcoursedatalist = fileids.split(",");
+            for (int n=0; n<stringcoursedatalist.length; n++){
+                for(DataList dataList : dataLists){
+                    if (stringcoursedatalist[n].equalsIgnoreCase(String.valueOf(dataList.getId()))){
+                        dataListss.add(dataList);
+                    }
+                }
+            }
+            taskPage.getRecords().get(j).setTask_file(dataListss);
         }
         return taskPage;
     }
@@ -72,6 +95,18 @@ public class TaskController extends BaseController<TaskService,Task> {
     @ApiOperation(value = "通过id获取Task")
     public Task getTaskById(@PathVariable Long id) {
         Task task=service.getById(id);
+        String fileids = task.getFile();
+        ArrayList<DataList> dataListss =  new ArrayList<>();
+        String[] stringcoursedatalist = fileids.split(",");
+        List<DataList> dataLists = dataListService.list(new QueryWrapper<>(new DataList()));
+        for (int n=0; n<stringcoursedatalist.length; n++){
+            for(DataList dataList : dataLists){
+                if (stringcoursedatalist[n].equalsIgnoreCase(String.valueOf(dataList.getId()))){
+                    dataListss.add(dataList);
+                }
+            }
+        }
+        task.setTask_file(dataListss);
         return task;
     }
 

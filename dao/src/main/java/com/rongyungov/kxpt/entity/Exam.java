@@ -121,8 +121,14 @@ public class Exam extends BaseEntity  implements Serializable {
 	 */
 	@ApiModelProperty("考试状态 ")
 	@TableField("status")
-
 	private String status;
+
+	/**
+	 * 是否组卷
+	 */
+	@ApiModelProperty("是否组卷 ")
+	@TableField("is_contest")
+	private String isContest;
 
 	/**
 	 * 备用字段1
@@ -240,6 +246,14 @@ public class Exam extends BaseEntity  implements Serializable {
 	@ApiModelProperty("排序编号")
 	@TableField(exist = false)
 	private String no;
+
+	public String getIsContest() {
+		return isContest;
+	}
+
+	public void setIsContest(String isContest) {
+		this.isContest = isContest;
+	}
 
 	public String getCourseId() {
 		return courseId;

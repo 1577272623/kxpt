@@ -103,6 +103,14 @@ public class Student extends BaseEntity  implements Serializable {
 	private String isAccessLogin;
 
 	/**
+	 * 是否可登录
+	 */
+	@ApiModelProperty("是否可登录")
+	@TableField("is_contest_student")
+
+	private String isContestStudent;
+
+	/**
 	 * 性别
 	 */
 	@ApiModelProperty("性别")
@@ -198,7 +206,13 @@ public class Student extends BaseEntity  implements Serializable {
 
 	private LocalDateTime updatedTime;
 
+	public String getIsContestStudent() {
+		return isContestStudent;
+	}
 
+	public void setIsContestStudent(String isContestStudent) {
+		this.isContestStudent = isContestStudent;
+	}
 
 	public Long getId() {
 		return id;

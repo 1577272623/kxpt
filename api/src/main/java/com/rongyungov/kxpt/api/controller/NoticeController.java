@@ -3,6 +3,7 @@ package com.rongyungov.kxpt.api.controller;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.rongyungov.framework.common.StringUtil;
 import com.rongyungov.kxpt.entity.DataList;
 import com.rongyungov.kxpt.entity.Task;
 import com.rongyungov.kxpt.service.DataListService;
@@ -53,6 +54,12 @@ public class NoticeController extends BaseController<NoticeService,Notice> {
         Page<Notice> page=new Page<Notice>(pageIndex,pageSize);
         QueryWrapper<Notice> queryWrapper=notice.toWrapper(notice);
         queryWrapper.orderByDesc("created_time");
+        if (notice.getSelectfirstTime() != null){
+            queryWrapper.le("created_time",notice.getSelectfirstTime());
+        }
+        if (notice.getSelectsecondTime() != null){
+            queryWrapper.lt("created_time",notice.getSelectfirstTime());
+        }
         int i =0;
         IPage<Notice> noticeIPage = service.page(page,queryWrapper);
         for (int j =0; j<noticeIPage.getRecords().size(); j++){

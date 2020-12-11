@@ -3,21 +3,35 @@ package com.rongyungov.kxpt.api.controller;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.rongyungov.framework.base.Result;
 import com.rongyungov.framework.entity.User;
 import com.rongyungov.framework.shiro.util.AesCipherUtil;
-import com.rongyungov.kxpt.entity.Student;
-import com.rongyungov.kxpt.entity.SysUser;
+import com.rongyungov.framework.shiro.util.JwtUtil;
+import com.rongyungov.kxpt.entity.*;
+import com.rongyungov.kxpt.service.DepTaskService;
 import com.rongyungov.kxpt.service.StudentService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
+
+import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-                import  com.rongyungov.framework.base.BaseController;
+import java.util.Map;
+
+import  com.rongyungov.framework.base.BaseController;
     import com.rongyungov.kxpt.service.TeacherService;
-import  com.rongyungov.kxpt.entity.Teacher;
+import org.springframework.web.multipart.MultipartFile;
+
+import javax.servlet.http.HttpServletRequest;
 
 /**
  *code is far away from bug with the animal protecting
@@ -30,6 +44,15 @@ import  com.rongyungov.kxpt.entity.Teacher;
 @Api(value="/teacher", description="Teacher 控制器")
 @RequestMapping("/teacher")
 public class TeacherController extends BaseController<TeacherService,Teacher> {
+
+    @Autowired
+    DepTaskService depTaskService;
+
+    @Autowired
+    HttpServletRequest request;
+
+    @Autowired
+    StudentService studentService;
 
     /**
      * @description : 获取分页列表
@@ -132,10 +155,107 @@ public class TeacherController extends BaseController<TeacherService,Teacher> {
 	}
 
 	@PostMapping("/addTask")
-    @ApiOperation(value = "添加任务")
-    public Boolean addTask(){
+    @ApiOperation(value = "推送任务")
+    public Result addTask(@RequestBody Task task){
+        DepTask depTask = new DepTask();
+        String class_ids = task.getClassNo();
+        String[] strings = class_ids.split(",");
+        depTask.setTaskId(String.valueOf(task.getId()));
+        int no = 0;
+        for (int i=0; i<strings.length; i++){
+            depTask.setDepartId(strings[i]);
+            depTaskService.save(depTask);
+            no++;
+        }
+        return Result.ok("成功推送到"+no+"个班级");
+    }
 
-        return null;
+    /**
+     * @description : 添加竞赛Student
+     * ---------------------------------
+     * @author : li
+     * @since : Create in 2020-11-11
+     * @return
+     */
+    @PostMapping("/readsaiImport")
+    @ApiOperation(value="批量读取竞赛Student")
+    public Result readsai(MultipartFile excel) throws Exception {
+        //模拟 竞赛名称
+        String contest_name = "十校联考";
+        String account = JwtUtil.getClaim(request.getHeader("Token"), "account");
+        String default_password = "123456"; //初始密码
+        List<Student> students = new ArrayList<>();
+        InputStream in = excel.getInputStream();
+        XSSFWorkbook work = new XSSFWorkbook(in);
+        int fail = 0, success = 0;
+        StringBuffer sb = new StringBuffer();
+        XSSFSheet Sheet1 = work.getSheetAt(0);
+        for (int i = 1; i < Sheet1.getLastRowNum()+1; i++) {
+            try {
+                success++;
+                Student student = new Student();
+                XSSFRow row = Sheet1.getRow(i);
+                row.getCell(2).setCellType(1);
+                row.getCell(3).setCellType(1);
+                student.setCreatedBy(account);
+                student.setDepno(String.valueOf(row.getCell(0)));
+                student.setName(String.valueOf(row.getCell(1)));
+                student.setTel(String.valueOf(row.getCell(2)));
+                String contest_account = String.valueOf(row.getCell(3));
+                student.setPassword(AesCipherUtil.encrypt(contest_account + default_password));
+                student.setNo(contest_account);
+                student.setIsContestStudent("1"); //设为竞赛学生
+                students.add(student);
+
+            } catch(Exception e){
+                fail++;
+                sb.append(e.getMessage() + "");
+            }
+        }
+        Map<String, Object> map = new HashMap<>();
+        StringBuffer stringBuffer = new StringBuffer();
+        stringBuffer.append("成功读取" + (success - fail) + "条记录， 失败：" + fail + "条记录<br>");
+        if (fail > 0) {
+            stringBuffer.append("失败的信息为：");
+            map.put("fail", fail);
+        } else {
+            map.put("fail", 0);
+        }
+        stringBuffer.append(sb.toString());
+        String msg = stringBuffer.toString();
+        map.put("msg", msg);
+        map.put("contest_student",students);
+        return Result.ok(map);
+
+    }
+
+    /**
+     * @description : 添加竞赛Student
+     * ---------------------------------
+     * @author : li
+     * @since : Create in 2020-11-11
+     * @return
+     */
+    @PostMapping("/addsaiImport")
+    @ApiOperation(value="批量写入竞赛Student")
+    @Transactional
+    public Result addsai(@RequestBody(required = false) List<Student> students) throws Exception {
+        int fail = 0, success = 0;
+        if (students!=null&& students.size()!=0){
+            for (Student student:students){
+                boolean b = studentService.save(student);
+                if (b){
+                    success++;
+                }else fail++;
+            }
+        }
+        Map<String, Object> map = new HashMap<>();
+        StringBuffer stringBuffer = new StringBuffer();
+        stringBuffer.append("成功写入" + success  + "条记录， 失败：" + fail + "条记录<br>");
+        String msg = stringBuffer.toString();
+        map.put("msg", msg);
+        return Result.ok(map);
+
     }
 
 }

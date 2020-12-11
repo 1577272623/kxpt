@@ -131,7 +131,7 @@ private static final long serialVersionUID = 1L;
      */
     @ApiModelProperty("创建时间")
 		    @TableField("created_time")
-				
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
 	private LocalDateTime createdTime;
 
 		    /**
@@ -147,7 +147,7 @@ private static final long serialVersionUID = 1L;
      */
     @ApiModelProperty("更新时间")
 		    @TableField("updated_time")
-				
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
 	private LocalDateTime updatedTime;
 
 	/**
@@ -157,8 +157,34 @@ private static final long serialVersionUID = 1L;
 
 	@TableId(value="no")
 	@TableField(exist = false)
-
 	private Integer no;
+
+	@TableField(exist = false)
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+	@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+	private LocalDateTime selectfirstTime;
+
+
+	@TableField(exist = false)
+	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+	@DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+	private LocalDateTime selectsecondTime;
+
+	public LocalDateTime getSelectfirstTime() {
+		return selectfirstTime;
+	}
+
+	public void setSelectfirstTime(LocalDateTime selectfirstTime) {
+		this.selectfirstTime = selectfirstTime;
+	}
+
+	public LocalDateTime getSelectsecondTime() {
+		return selectsecondTime;
+	}
+
+	public void setSelectsecondTime(LocalDateTime selectsecondTime) {
+		this.selectsecondTime = selectsecondTime;
+	}
 
 	public Integer getNo() {
 		return no;
