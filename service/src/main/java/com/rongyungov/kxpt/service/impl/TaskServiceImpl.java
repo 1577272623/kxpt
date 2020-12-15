@@ -18,7 +18,13 @@ import    com.rongyungov.framework.base.BaseServiceImpl;
 public class TaskServiceImpl extends BaseServiceImpl<TaskMapper, Task> implements TaskService {
 
 
- 
+
+     public boolean sqlExecute(String sql)
+     {
+         return this.baseMapper.sqlExecute(sql);
+
+     }
+
 
 
 	
