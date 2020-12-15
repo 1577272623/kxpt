@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.rongyungov.framework.base.Result;
+import com.rongyungov.framework.shiro.util.JwtUtil;
 import com.rongyungov.kxpt.entity.*;
 import com.rongyungov.kxpt.service.*;
 import com.rongyungov.kxpt.utils.ExcelUtils;
@@ -24,6 +25,8 @@ import java.util.Map;
 
 import  com.rongyungov.framework.base.BaseController;
 import org.springframework.web.multipart.MultipartFile;
+
+import javax.servlet.http.HttpServletRequest;
 
 /**
  *code is far away from bug with the animal protecting
@@ -55,6 +58,9 @@ public class TaskController extends BaseController<TaskService,Task> {
     @Autowired
     TaskService taskService;
 
+    @Autowired
+    HttpServletRequest request;
+
 
 
     /**
@@ -70,7 +76,7 @@ public class TaskController extends BaseController<TaskService,Task> {
                                 @ApiParam(name="pageSize",value="页大小",required=true,defaultValue = "10")@RequestParam Integer pageSize
                                 ) throws InstantiationException, IllegalAccessException {
         Page<Task> page=new Page<Task>(pageIndex,pageSize);
-        QueryWrapper<Task> queryWrapper=task.toWrapper(task);
+        QueryWrapper<Task> queryWrapper=new QueryWrapper<>(new Task());
         queryWrapper.orderByDesc("created_time");
         int i =0;
         IPage<Task> taskPage = service.page(page,queryWrapper);
@@ -93,6 +99,12 @@ public class TaskController extends BaseController<TaskService,Task> {
             taskPage.getRecords().get(j).setTask_file(dataListss);
         }
         return taskPage;
+    }
+
+    @PostMapping("/Alllist")
+    @ApiOperation(value = "获取所有任务信息")
+    public List<Task> getAllTasks(){
+        return service.list(new QueryWrapper<>());
     }
 
     /**
@@ -223,7 +235,7 @@ public class TaskController extends BaseController<TaskService,Task> {
                     }
                 }
                 for (Grade grade:grades){
-                    if (grade.getDapartment().equalsIgnoreCase(String.valueOf(department.getId()))){
+                    if (grade.getDepartment().equalsIgnoreCase(String.valueOf(department.getId()))){
                         class_grade_count++;
                     }
                 }
@@ -242,46 +254,60 @@ public class TaskController extends BaseController<TaskService,Task> {
      * @since : Create in 2020-11-11
      */
     @PostMapping("/classtaskDA")
-    @ApiOperation(value = "教师首页获取任务总完成度")
-    public Map<String,Object> getclasstaskDA(@ApiParam(name="teacher",value="筛选条件") @RequestBody(required = false) Teacher teacher ) {
-        List<Department> departmentList = departmentService.list(new QueryWrapper<Department>()
-                .ne("parent_id", "0"));
+    @ApiOperation(value = "班级任务")
+    public Map<String,Object> getclasstaskDA( String class_id,String task_id ) {
+        QueryWrapper<Department> departmentQueryWrapper;
+        QueryWrapper<Task> taskQueryWrapper;
+        if (class_id != null){
+            departmentQueryWrapper = new QueryWrapper<Department>().eq("id", class_id);
+        }else {
+            departmentQueryWrapper = new QueryWrapper<Department>().ne("parent_id", "0");
+        }
+        if (task_id != null){
+            taskQueryWrapper = new QueryWrapper<Task>().eq("id", task_id);
+        }else {
+            taskQueryWrapper = new QueryWrapper<Task>();
+        }
+        List<Task> tasks = taskService.list(taskQueryWrapper);
+        List<Department> departmentList = departmentService.list(departmentQueryWrapper);
         List<DepTask> depTasks = depTaskService.list(new QueryWrapper<>());
-        List<Task> tasks = taskService.list(new QueryWrapper<>());
         List<Student> students = studentService.list(new QueryWrapper<>());
         List<Grade> grades = gradeService.list(new QueryWrapper<>());
+        String account = JwtUtil.getClaim(request.getHeader("Token"), "account");
         Map<String,Object> class_taskmap = new HashMap<>();
         for (Department department : departmentList) {
-            int student_count = 0; //班级学生数
-            int student_do = 0; //做了题的学生数
-            int task_count = 0; //班级任务数
+
             ArrayList<Task> taskList = new ArrayList<>();
-            if (department.getCreatedBy().equalsIgnoreCase(String.valueOf(teacher.getId()))) {
+            if (department.getCreatedBy().equalsIgnoreCase(account)) {
+                int task_count = 0; //班级任务数
+
+                for (DepTask depTask:depTasks){
+                    if (depTask.getDepartId().equalsIgnoreCase(String.valueOf(department.getId()))){
+                        task_count++;
+                        int student_do = 0; //做了题的学生数
+                        for (Task task : tasks){
+                            if (depTask.getTaskId().equalsIgnoreCase(String.valueOf(task.getId()))){
+                                for (Grade grade: grades){
+                                    if (grade.getDepartment().equalsIgnoreCase(String.valueOf(department.getId()))&&
+                                    grade.getExamId().equalsIgnoreCase(String.valueOf(task.getId()))){
+                                        if (grade.getType().equalsIgnoreCase("3")){
+                                            student_do++;
+                                        }
+                                    }
+                                }
+                                task.setOk_num(student_do);
+                                taskList.add(task);
+                            }
+                        }
+                    }
+                }
+                int student_count = 0; //班级学生数
                 for (Student student:students){
                     if (student.getClassno().equalsIgnoreCase(String.valueOf(department.getId()))){
                         student_count++;
                     }
                 }
-                for (DepTask depTask:depTasks){
-                    if (depTask.getDepartId().equalsIgnoreCase(String.valueOf(department.getId()))){
-                        task_count++;
-                        for (Task task : tasks){
-                            if (depTask.getTaskId().equalsIgnoreCase(String.valueOf(task.getId()))){
-                                for (Grade grade: grades){
-                                    if (grade.getDapartment().equalsIgnoreCase(String.valueOf(department.getId()))&&
-                                    grade.getExam_id().equalsIgnoreCase(String.valueOf(task.getId()))){
-                                        if (grade.getType().equals("3")){
-                                            student_do++;
-                                        }
-                                    }
-                                }
-                            }
-                            task.setOk_num(student_do);
-                            taskList.add(task);
-                            class_taskmap.put(department.getName(),task);
-                        }
-                    }
-                }
+                class_taskmap.put(department.getName(),taskList);
             }
         }
         return class_taskmap;

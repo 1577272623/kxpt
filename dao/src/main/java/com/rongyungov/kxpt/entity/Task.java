@@ -193,6 +193,17 @@ public class Task extends BaseEntity  implements Serializable {
 	@TableField(exist = false)
 	private String classNo;
 
+	@TableField(exist = false)
+	private int  student_count;
+
+	public int getStudent_count() {
+		return student_count;
+	}
+
+	public void setStudent_count(int student_count) {
+		this.student_count = student_count;
+	}
+
 	public int getOk_num() {
 		return ok_num;
 	}

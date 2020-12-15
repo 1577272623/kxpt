@@ -3,8 +3,9 @@ package com.rongyungov.kxpt.api.controller;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.rongyungov.framework.common.StringUtil;
-import com.rongyungov.kxpt.dao.NoticeMapper;
+import com.rongyungov.framework.entity.User;
+import com.rongyungov.framework.service.UserService;
+import com.rongyungov.framework.shiro.util.JwtUtil;
 import com.rongyungov.kxpt.entity.*;
 import com.rongyungov.kxpt.service.DataListService;
 import com.rongyungov.kxpt.service.DepartmentService;
@@ -12,7 +13,6 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -23,6 +23,8 @@ import java.util.Map;
 
 import  com.rongyungov.framework.base.BaseController;
     import com.rongyungov.kxpt.service.NoticeService;
+
+import javax.servlet.http.HttpServletRequest;
 
 /**
  *code is far away from bug with the animal protecting
@@ -45,6 +47,12 @@ public class NoticeController extends BaseController<NoticeService,Notice> {
     @Autowired
     NoticeService noticeService;
 
+    @Autowired
+    UserService userService;
+
+    @Autowired
+    HttpServletRequest request;
+
     /**
      * @description : 获取分页列表
      * ---------------------------------
@@ -59,6 +67,9 @@ public class NoticeController extends BaseController<NoticeService,Notice> {
                                 ) throws InstantiationException, IllegalAccessException {
         Page<Notice> page=new Page<Notice>(pageIndex,pageSize);
         QueryWrapper<Notice> queryWrapper= new QueryWrapper<>(new Notice());
+        List<DataList> dataLists = dataListService.list(new QueryWrapper<>(new DataList()));
+        List<Department> departments = departmentService.list(new QueryWrapper<>());
+        List<User> users = userService.list(new QueryWrapper<>());
         queryWrapper.orderByDesc("created_time");
         if (notice.getSelectfirstTime() != null){
             queryWrapper.ge("created_time",notice.getSelectfirstTime());
@@ -67,12 +78,31 @@ public class NoticeController extends BaseController<NoticeService,Notice> {
             queryWrapper.le("created_time",notice.getSelectsecondTime());
         }
         int i =0;
+        String creat_by ="";
         IPage<Notice> noticeIPage = service.page(page,queryWrapper);
         for (int j =0; j<noticeIPage.getRecords().size(); j++){
             i++;
             int s= (int) noticeIPage.getSize();
             int c= (int) (noticeIPage.getCurrent()-1);
             noticeIPage.getRecords().get(j).setNo(i+s*c);
+            String classids = noticeIPage.getRecords().get(j).getClassNo();
+            ArrayList<String> dataListss =  new ArrayList<>();
+            String[] stringcoursedatalist = classids.split(",");
+
+            for (int n=0; n<stringcoursedatalist.length; n++){
+                for(Department dataList : departments){
+                    if (stringcoursedatalist[n].equalsIgnoreCase(String.valueOf(dataList.getId()))){
+                        dataListss.add(dataList.getName());
+                    }
+                }
+            }
+            for (User user : users){
+                if(user.getAccount().equalsIgnoreCase(noticeIPage.getRecords().get(j).getCreatedBy())){
+                    creat_by = user.getUsername();
+                }
+            }
+            noticeIPage.getRecords().get(j).setClass_name(dataListss);
+            noticeIPage.getRecords().get(j).setCreatedBy(creat_by);
         }
         return noticeIPage;
     }
@@ -162,6 +192,8 @@ public class NoticeController extends BaseController<NoticeService,Notice> {
     public Boolean add(@RequestBody Notice  notice) {
         Boolean success=service.save( notice);
         LocalDateTime dateTime = LocalDateTime.now();
+        String account = JwtUtil.getClaim(request.getHeader("Token"), "account");
+        notice.setCreatedBy(account);
         notice.setCreatedTime(dateTime);
         return success;
 	}

@@ -35,20 +35,20 @@ public class Grade extends BaseEntity  implements Serializable {
 	private Long id;
 
 	/**
-	 * 试卷名
+	 * 试卷 id
 	 */
-	@ApiModelProperty("试卷id")
+	@ApiModelProperty("试卷 id")
 	@TableField("exam_id")
 
-	private String exam_id;
+	private String examId;
 
 	/**
 	 * 所属部门
 	 */
 	@ApiModelProperty("所属部门")
-	@TableField("dapartment")
+	@TableField("department")
 
-	private String dapartment;
+	private String department;
 
 	/**
 	 * 学生名
@@ -157,22 +157,21 @@ public class Grade extends BaseEntity  implements Serializable {
 		this.id = id;
 	}
 
-
-	public String getExam_id() {
-		return exam_id;
+	public String getExamId() {
+		return examId;
 	}
 
-	public void setExam_id(String exam_id) {
-		this.exam_id = exam_id;
+	public void setExamId(String examId) {
+		this.examId = examId;
 	}
 
-	public String getDapartment() {
-		return dapartment;
+	public String getDepartment() {
+		return department;
 	}
 
 
-	public void setDapartment(String dapartment) {
-		this.dapartment = dapartment;
+	public void setDepartment(String department) {
+		this.department = department;
 	}
 
 
@@ -300,8 +299,8 @@ public class Grade extends BaseEntity  implements Serializable {
 	public String toString() {
 		return "Grade{" +
 				"id=" + id +
-				", exam_id=" + exam_id +
-				", dapartment=" + dapartment +
+				", examId=" + examId +
+				", department=" + department +
 				", student=" + student +
 				", grade=" + grade +
 				", isDelete=" + isDelete +

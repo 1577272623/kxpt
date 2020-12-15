@@ -3,6 +3,8 @@ package com.rongyungov.kxpt.entity;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+
+import java.awt.*;
 import java.io.Serializable;
 import lombok.experimental.Accessors;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -12,7 +14,9 @@ import  com.baomidou.mybatisplus.annotation.TableName;
     import  com.baomidou.mybatisplus.extension.activerecord.Model;
     import  com.baomidou.mybatisplus.annotation.TableId;
     import  java.time.LocalDateTime;
-    import  com.baomidou.mybatisplus.annotation.TableLogic;
+import java.util.List;
+
+import  com.baomidou.mybatisplus.annotation.TableLogic;
     import  com.rongyungov.framework.base.BaseEntity;
     import  com.baomidou.mybatisplus.annotation.TableField;
     
@@ -168,6 +172,13 @@ private static final long serialVersionUID = 1L;
 	private Integer no;
 
 	@TableField(exist = false)
+	private List<String> class_name;
+
+
+	@TableField(exist = false)
+	private List<DataList> noticeList;
+
+	@TableField(exist = false)
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
 	private LocalDateTime selectfirstTime;
 
@@ -175,6 +186,22 @@ private static final long serialVersionUID = 1L;
 	@TableField(exist = false)
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
 	private LocalDateTime selectsecondTime;
+
+	public List<String> getClass_name() {
+		return class_name;
+	}
+
+	public void setClass_name(List<String> class_name) {
+		this.class_name = class_name;
+	}
+
+	public List<DataList> getNoticeList() {
+		return noticeList;
+	}
+
+	public void setNoticeList(List<DataList> noticeList) {
+		this.noticeList = noticeList;
+	}
 
 	public String getClassNo() {
 		return classNo;

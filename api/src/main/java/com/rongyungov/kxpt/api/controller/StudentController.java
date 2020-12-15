@@ -4,6 +4,8 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.rongyungov.framework.base.Result;
+import com.rongyungov.framework.entity.UserRole;
+import com.rongyungov.framework.service.UserRoleService;
 import com.rongyungov.framework.shiro.util.AesCipherUtil;
 import com.rongyungov.framework.shiro.util.JwtUtil;
 import com.rongyungov.kxpt.entity.DepTask;
@@ -11,6 +13,7 @@ import com.rongyungov.kxpt.entity.Task;
 import com.rongyungov.kxpt.entity.Test;
 import com.rongyungov.kxpt.service.DepTaskService;
 import com.rongyungov.kxpt.service.TaskService;
+import com.rongyungov.kxpt.utils.KxptConstant;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -53,6 +56,9 @@ public class StudentController extends BaseController<StudentService,Student> {
 
     @Autowired
     TaskService taskService;
+
+    @Autowired
+    UserRoleService userRoleService;
 
     /**
      * @description : 获取分页列表
@@ -152,7 +158,13 @@ public class StudentController extends BaseController<StudentService,Student> {
         String account = JwtUtil.getClaim(request.getHeader("Token"), "account");
         student.setCreatedBy(account);
         student.setPassword(AesCipherUtil.encrypt(student.getNo() + student.getPassword()));
-        Boolean success = ((StudentService)this.service).save(student);
+        Boolean success = service.save(student);
+
+        UserRole userRole = new UserRole();
+        userRole.setUserId(student.getId());
+        userRole.setRoleId(13L);
+        userRole.setUserNo(KxptConstant.USER_TYPE_STUDENT);
+        userRoleService.save(userRole);
         return success;
 	}
 

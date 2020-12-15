@@ -167,6 +167,8 @@ public class Department extends BaseEntity  implements Serializable {
 	@TableField(exist = false)
 	private List<Department> children;
 
+
+
 	public List<Department> getChildren() {
 		return children;
 	}

@@ -52,18 +52,18 @@ public class GradeController extends BaseController<GradeService,Grade> {
         Page<Grade> page=new Page<Grade>(pageIndex,pageSize);
         QueryWrapper<Grade> queryWrapper=new QueryWrapper<>(new Grade());
         queryWrapper.orderByDesc("grade");
-        if (grade.getDapartment() != null){
-            queryWrapper.eq("dapartment",grade.getDapartment());
+        if (grade.getDepartment() != null){
+            queryWrapper.eq("dapartment",grade.getDepartment());
         }
 
         if (grade.getType() != null){
             queryWrapper.eq("type",grade.getType());
         }
-        if (grade.getExam_id() != null){
-            queryWrapper.eq("exam_id",grade.getExam_id());
+        if (grade.getExamId() != null){
+            queryWrapper.eq("exam_id",grade.getExamId());
         }
         IPage<Grade> gradeIPage = service.page(page,queryWrapper);
-        List<Student> students = studentService.list(new QueryWrapper<Student>().eq("classno",grade.getDapartment()));
+        List<Student> students = studentService.list(new QueryWrapper<Student>().eq("classno",grade.getDepartment()));
         for (int j =0; j<gradeIPage.getRecords().size(); j++){
             for (Student student: students){
                 if (String.valueOf(student.getId()).equals(gradeIPage.getRecords().get(j).getStudent())){
