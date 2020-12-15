@@ -12,6 +12,7 @@ import com.rongyungov.kxpt.service.*;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import net.bytebuddy.implementation.bytecode.Throw;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -94,6 +95,29 @@ public class TeacherController extends BaseController<TeacherService,Teacher> {
     }
 
     /**
+     * @description : 通过id获取Teacher
+     * ---------------------------------
+     * @author : li
+     * @since : Create in 2020-11-11
+     */
+    @GetMapping("/get/Teacher")
+    @ApiOperation(value = "通过account获取Teacher")
+    public Teacher getTeacherByAccount() throws Exception {
+        String account = JwtUtil.getClaim(request.getHeader("Token"), "account");
+        Teacher teacher=service.getOne(new QueryWrapper<Teacher>().eq("teano",account));
+        Department dep = departmentService.getById(teacher.getDepno());
+        teacher.setDepno(dep.getName());
+        DataList photo = dataListService.getById(teacher.getPhoto());
+        teacher.setPhoto(photo.getFile());
+        if (teacher!= null){
+            return teacher;
+        }else {
+            throw new Exception("未找到教师信息！");
+        }
+
+    }
+
+    /**
      * @description : 通过id删除Teacher
      * ---------------------------------
      * @author : li
@@ -163,21 +187,7 @@ public class TeacherController extends BaseController<TeacherService,Teacher> {
         return success;
 	}
 
-	@PostMapping("/addTask")
-    @ApiOperation(value = "推送任务")
-    public Result addTask(@RequestBody Task task){
-        DepTask depTask = new DepTask();
-        String class_ids = task.getClassNo();
-        String[] strings = class_ids.split(",");
-        depTask.setTaskId(String.valueOf(task.getId()));
-        int no = 0;
-        for (int i=0; i<strings.length; i++){
-            depTask.setDepartId(strings[i]);
-            depTaskService.save(depTask);
-            no++;
-        }
-        return Result.ok("成功推送到"+no+"个班级");
-    }
+
 
     /**
      * @description : 添加竞赛Student

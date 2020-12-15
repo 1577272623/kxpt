@@ -4,9 +4,10 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.rongyungov.framework.common.StringUtil;
-import com.rongyungov.kxpt.entity.DataList;
-import com.rongyungov.kxpt.entity.Task;
+import com.rongyungov.kxpt.dao.NoticeMapper;
+import com.rongyungov.kxpt.entity.*;
 import com.rongyungov.kxpt.service.DataListService;
+import com.rongyungov.kxpt.service.DepartmentService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -22,7 +23,6 @@ import java.util.Map;
 
 import  com.rongyungov.framework.base.BaseController;
     import com.rongyungov.kxpt.service.NoticeService;
-import  com.rongyungov.kxpt.entity.Notice;
 
 /**
  *code is far away from bug with the animal protecting
@@ -38,6 +38,12 @@ public class NoticeController extends BaseController<NoticeService,Notice> {
 
     @Autowired
     DataListService dataListService;
+
+    @Autowired
+    DepartmentService departmentService;
+
+    @Autowired
+    NoticeService noticeService;
 
     /**
      * @description : 获取分页列表
@@ -160,6 +166,34 @@ public class NoticeController extends BaseController<NoticeService,Notice> {
         return success;
 	}
 
+    /**
+     * @description : 教师首页获取班级公告
+     * ---------------------------------
+     * @author : li
+     * @since : Create in 2020-11-11
+     */
+    @PostMapping("/getClassNotice")
+    @ApiOperation(value = "教师首页获取班级公告")
+    public List<Notice> getClassNotice(@ApiParam(name="teacher",value="筛选条件") @RequestBody(required = false) Teacher teacher ) {
+        List<Department> departmentList = departmentService.list(new QueryWrapper<Department>()
+                .ne("parent_id", "0"));
+        List<Notice> notices = noticeService.list(new QueryWrapper<>());
+        List<Notice> noticeList = new ArrayList<>();
+        for (Department department : departmentList) {
+            if (department.getCreatedBy().equalsIgnoreCase(String.valueOf(teacher.getId()))) {
+                for (Notice notice: notices){
+                    String notice_class = notice.getClassNo();
+                    String[] notice_classList = notice_class.split(",");
+                    for (int i=0; i<notice_classList.length; i++){
+                        if (notice_classList[i].equalsIgnoreCase(String.valueOf(department.getId()))){
+                            noticeList.add(notice);
+                        }
+                    }
+                }
+            }
 
+        }
+        return noticeList;
+    }
 
 }

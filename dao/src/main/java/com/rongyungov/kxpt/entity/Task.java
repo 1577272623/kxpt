@@ -183,12 +183,23 @@ public class Task extends BaseEntity  implements Serializable {
 	@TableField(exist = false)
 	private List<DataList> task_file;
 
+	@TableField(exist = false)
+	private int ok_num; //任务完成人数
+
 	/**
 	 * 所属部門
 	 */
 	@ApiModelProperty("班级编号")
 	@TableField(exist = false)
 	private String classNo;
+
+	public int getOk_num() {
+		return ok_num;
+	}
+
+	public void setOk_num(int ok_num) {
+		this.ok_num = ok_num;
+	}
 
 	public List<DataList> getTask_file() {
 		return task_file;

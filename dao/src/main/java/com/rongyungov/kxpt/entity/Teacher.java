@@ -3,6 +3,8 @@ package com.rongyungov.kxpt.entity;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
+
+import java.awt.*;
 import java.io.Serializable;
 import lombok.experimental.Accessors;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -12,6 +14,8 @@ import  com.baomidou.mybatisplus.annotation.IdType;
 import  com.baomidou.mybatisplus.extension.activerecord.Model;
 import  com.baomidou.mybatisplus.annotation.TableId;
 import  java.time.LocalDateTime;
+import java.util.List;
+
 import  com.baomidou.mybatisplus.annotation.TableLogic;
 import  com.rongyungov.framework.base.BaseEntity;
 import  com.baomidou.mybatisplus.annotation.TableField;
@@ -190,6 +194,16 @@ public class Teacher extends BaseEntity  implements Serializable {
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
 	private LocalDateTime updatedTime;
 
+	@TableField(exist = false)
+	private List<DataList> file;
+
+	public List<DataList> getFile() {
+		return file;
+	}
+
+	public void setFile(List<DataList> file) {
+		this.file = file;
+	}
 
 	public Long getId() {
 		return id;

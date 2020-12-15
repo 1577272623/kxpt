@@ -52,6 +52,11 @@ public class TaskController extends BaseController<TaskService,Task> {
     @Autowired
     StudentService studentService;
 
+    @Autowired
+    TaskService taskService;
+
+
+
     /**
      * @description : 获取分页列表
      * ---------------------------------
@@ -154,12 +159,28 @@ public class TaskController extends BaseController<TaskService,Task> {
      * @since : Create in 2020-11-25
      */
     @PutMapping("/update/{id}")
-    @ApiOperation(value="通过id更新Task")
+    @ApiOperation(value="通过id更新Task 推送")
     public Boolean update(@ApiParam(name="id",value="id主键值",required=true) @PathVariable Long id,@RequestBody Task task) {
+        Boolean success = false;
         if(id!=null)
             task.setId(id);
-        Boolean success=service.updateById(task);
+        success = service.updateById(task);
         return success;
+    }
+    @PostMapping("/addTask")
+    @ApiOperation(value = "推送任务")
+    public Result addTask(@RequestBody Task task){
+        DepTask depTask = new DepTask();
+        String class_ids = task.getClassNo();
+        String[] strings = class_ids.split(",");
+        depTask.setTaskId(String.valueOf(task.getId()));
+        int no = 0;
+        for (int i=0; i<strings.length; i++){
+            depTask.setDepartId(strings[i]);
+            depTaskService.save(depTask);
+            no++;
+        }
+        return Result.ok("成功推送到"+no+"个班级");
     }
     /**
      * @description : 添加Task
@@ -171,9 +192,11 @@ public class TaskController extends BaseController<TaskService,Task> {
     @ApiOperation(value="添加Task")
     public Boolean add(@RequestBody Task  task) {
         Boolean success =false;
-        LocalDateTime dateTime = LocalDateTime.now();
-        task.setCreatedTime(dateTime);
-        success=service.save(task);
+        if (task.getFile()!=null){
+            LocalDateTime dateTime = LocalDateTime.now();
+            task.setCreatedTime(dateTime);
+            success=service.save(task);
+        }
         return success;
 	}
 
@@ -184,7 +207,7 @@ public class TaskController extends BaseController<TaskService,Task> {
      * @since : Create in 2020-11-11
      */
     @PostMapping("/taskDA")
-    @ApiOperation(value = "教师首页获取任务完成度")
+    @ApiOperation(value = "教师首页获取任务总完成度")
     public Map<String,Object> gettaskDA(@ApiParam(name="teacher",value="筛选条件") @RequestBody(required = false) Teacher teacher ) throws InstantiationException, IllegalAccessException {
         List<Department> departmentList = departmentService.list(new QueryWrapper<Department>()
                 .ne("parent_id","0"));
@@ -210,6 +233,58 @@ public class TaskController extends BaseController<TaskService,Task> {
         }
 
         return class_count;
+    }
+
+    /**
+     * @description : 获取任务完成度
+     * ---------------------------------
+     * @author : li
+     * @since : Create in 2020-11-11
+     */
+    @PostMapping("/classtaskDA")
+    @ApiOperation(value = "教师首页获取任务总完成度")
+    public Map<String,Object> getclasstaskDA(@ApiParam(name="teacher",value="筛选条件") @RequestBody(required = false) Teacher teacher ) {
+        List<Department> departmentList = departmentService.list(new QueryWrapper<Department>()
+                .ne("parent_id", "0"));
+        List<DepTask> depTasks = depTaskService.list(new QueryWrapper<>());
+        List<Task> tasks = taskService.list(new QueryWrapper<>());
+        List<Student> students = studentService.list(new QueryWrapper<>());
+        List<Grade> grades = gradeService.list(new QueryWrapper<>());
+        Map<String,Object> class_taskmap = new HashMap<>();
+        for (Department department : departmentList) {
+            int student_count = 0; //班级学生数
+            int student_do = 0; //做了题的学生数
+            int task_count = 0; //班级任务数
+            ArrayList<Task> taskList = new ArrayList<>();
+            if (department.getCreatedBy().equalsIgnoreCase(String.valueOf(teacher.getId()))) {
+                for (Student student:students){
+                    if (student.getClassno().equalsIgnoreCase(String.valueOf(department.getId()))){
+                        student_count++;
+                    }
+                }
+                for (DepTask depTask:depTasks){
+                    if (depTask.getDepartId().equalsIgnoreCase(String.valueOf(department.getId()))){
+                        task_count++;
+                        for (Task task : tasks){
+                            if (depTask.getTaskId().equalsIgnoreCase(String.valueOf(task.getId()))){
+                                for (Grade grade: grades){
+                                    if (grade.getDapartment().equalsIgnoreCase(String.valueOf(department.getId()))&&
+                                    grade.getExam_id().equalsIgnoreCase(String.valueOf(task.getId()))){
+                                        if (grade.getType().equals("3")){
+                                            student_do++;
+                                        }
+                                    }
+                                }
+                            }
+                            task.setOk_num(student_do);
+                            taskList.add(task);
+                            class_taskmap.put(department.getName(),task);
+                        }
+                    }
+                }
+            }
+        }
+        return class_taskmap;
     }
 
 }

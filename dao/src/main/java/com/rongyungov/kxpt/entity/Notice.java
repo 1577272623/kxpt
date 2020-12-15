@@ -53,6 +53,14 @@ private static final long serialVersionUID = 1L;
 				
 	private String content;
 
+	/**
+	 * 班级编号
+	 */
+	@ApiModelProperty("班级编号")
+	@TableField("class_no")
+
+	private String classNo;
+
 		    /**
      * 附件
      */
@@ -167,6 +175,14 @@ private static final long serialVersionUID = 1L;
 	@TableField(exist = false)
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
 	private LocalDateTime selectsecondTime;
+
+	public String getClassNo() {
+		return classNo;
+	}
+
+	public void setClassNo(String classNo) {
+		this.classNo = classNo;
+	}
 
 	public LocalDateTime getSelectfirstTime() {
 		return selectfirstTime;

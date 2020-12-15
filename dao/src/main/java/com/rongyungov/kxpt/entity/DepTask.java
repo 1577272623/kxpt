@@ -57,8 +57,8 @@ private static final long serialVersionUID = 1L;
      * 是否删除
      */
     @ApiModelProperty("是否删除")
-		    @TableField("isdeleted")
-			    @TableLogic
+	@TableField("isdeleted")
+	@TableLogic
 		
 	private String isdeleted;
 

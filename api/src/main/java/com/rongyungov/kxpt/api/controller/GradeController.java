@@ -59,8 +59,8 @@ public class GradeController extends BaseController<GradeService,Grade> {
         if (grade.getType() != null){
             queryWrapper.eq("type",grade.getType());
         }
-        if (grade.getName() != null){
-            queryWrapper.eq("name",grade.getName());
+        if (grade.getExam_id() != null){
+            queryWrapper.eq("exam_id",grade.getExam_id());
         }
         IPage<Grade> gradeIPage = service.page(page,queryWrapper);
         List<Student> students = studentService.list(new QueryWrapper<Student>().eq("classno",grade.getDapartment()));
@@ -157,9 +157,10 @@ public class GradeController extends BaseController<GradeService,Grade> {
      * @author : li
      * @since : Create in 2020-11-11
      */
-    @PostMapping("/NewGradeRenking")
+    @PostMapping("/getGradeRenking")
     @ApiOperation(value = "教师首页获取成绩排名")
-    public Map<String,Object> getNewGradeRenking(@ApiParam(name="teacher",value="筛选条件") @RequestBody(required = false) Teacher teacher ) throws InstantiationException, IllegalAccessException {
+    public Map<String,Object> getNewGradeRenking(@ApiParam(name="teacher",value="筛选条件") @RequestBody(required = false) Teacher teacher ){
+
         return null;
     }
 
