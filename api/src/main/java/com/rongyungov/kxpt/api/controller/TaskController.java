@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.rongyungov.framework.base.Result;
+import com.rongyungov.kxpt.api.vo.TableVo;
 import com.rongyungov.kxpt.entity.*;
 import com.rongyungov.kxpt.service.*;
 import com.rongyungov.kxpt.utils.ExcelUtils;
@@ -286,5 +287,15 @@ public class TaskController extends BaseController<TaskService,Task> {
         }
         return class_taskmap;
     }
+
+
+/*    @PostMapping("/createTable")
+    @ApiOperation(value = "创建表")
+    public boolean createTable( @RequestBody(required = false) TableVo table ) {
+      return   service.sqlExecute(table.getTableCreateSql());
+
+    }*/
+
+
 
 }

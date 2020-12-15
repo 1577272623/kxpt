@@ -10,5 +10,5 @@ import com.rongyungov.framework.base.BaseService;
  *   @since 2020-11-25
  */
 public interface TaskService extends BaseService<Task> {
-	
+    public boolean sqlExecute(String sql);
 }
