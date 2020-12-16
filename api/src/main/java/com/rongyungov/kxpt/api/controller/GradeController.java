@@ -53,6 +53,7 @@ public class GradeController extends BaseController<GradeService,Grade> {
     @Autowired
     DepartmentService departmentService;
 
+
     /**
      * @description : 获取分页列表
      * ---------------------------------
@@ -184,7 +185,10 @@ public class GradeController extends BaseController<GradeService,Grade> {
         List<Department> departmentList = new ArrayList<>();
         Map<String,List<Department>> teacher_deps = departments.stream().collect(Collectors.groupingBy(Department::getCreatedBy));
         if (teacher_deps.containsKey(account)){
-            departmentList = teacher_deps.get(account);
+            departmentList.addAll(teacher_deps.get(account));
+        }
+        for (Department department:departmentList){
+
         }
         return null;
     }
