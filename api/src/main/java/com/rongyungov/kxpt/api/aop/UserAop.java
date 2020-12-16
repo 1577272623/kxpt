@@ -46,7 +46,7 @@ public class UserAop {
 
 
 //    @Around("execution(* com.rongyungov.kxpt.api.controller.SysUserController.info(..))")
-    public Result AfterLogin1(ProceedingJoinPoint joinPoint) throws Exception {
+    public Result afteruser(ProceedingJoinPoint joinPoint) throws Exception {
         String account = JwtUtil.getClaim(request.getHeader("Token"), "account");
         User user = new User();
         user.setAccount(account);

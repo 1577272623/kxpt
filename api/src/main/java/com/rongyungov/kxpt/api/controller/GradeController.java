@@ -3,8 +3,12 @@ package com.rongyungov.kxpt.api.controller;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.rongyungov.framework.shiro.util.JwtUtil;
 import com.rongyungov.kxpt.entity.*;
+import com.rongyungov.kxpt.service.DepartmentService;
+import com.rongyungov.kxpt.service.GradeVoService;
 import com.rongyungov.kxpt.service.StudentService;
+import com.sun.org.apache.regexp.internal.RE;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -18,9 +22,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import  com.rongyungov.framework.base.BaseController;
     import com.rongyungov.kxpt.service.GradeService;
+
+import javax.servlet.http.HttpServletRequest;
 
 /**
  *code is far away from bug with the animal protecting
@@ -36,6 +43,15 @@ public class GradeController extends BaseController<GradeService,Grade> {
 
     @Autowired
     StudentService studentService;
+
+    @Autowired
+    GradeVoService gradeVoService;
+
+    @Autowired
+    HttpServletRequest request;
+
+    @Autowired
+    DepartmentService departmentService;
 
     /**
      * @description : 获取分页列表
@@ -53,7 +69,7 @@ public class GradeController extends BaseController<GradeService,Grade> {
         QueryWrapper<Grade> queryWrapper=new QueryWrapper<>(new Grade());
         queryWrapper.orderByDesc("grade");
         if (grade.getDepartment() != null){
-            queryWrapper.eq("dapartment",grade.getDepartment());
+            queryWrapper.eq("department",grade.getDepartment());
         }
 
         if (grade.getType() != null){
@@ -63,11 +79,14 @@ public class GradeController extends BaseController<GradeService,Grade> {
             queryWrapper.eq("exam_id",grade.getExamId());
         }
         IPage<Grade> gradeIPage = service.page(page,queryWrapper);
+//        List<GradeVo> students = gradeVoService.list(new QueryWrapper<GradeVo>().eq("department",grade.getDepartment()));
+
         List<Student> students = studentService.list(new QueryWrapper<Student>().eq("classno",grade.getDepartment()));
         for (int j =0; j<gradeIPage.getRecords().size(); j++){
             for (Student student: students){
                 if (String.valueOf(student.getId()).equals(gradeIPage.getRecords().get(j).getStudent())){
                     gradeIPage.getRecords().get(j).setStudent(student.getName());
+                    gradeIPage.getRecords().get(j).setExt1(student.getNo());
                 }
             }
 
@@ -159,8 +178,14 @@ public class GradeController extends BaseController<GradeService,Grade> {
      */
     @PostMapping("/getGradeRenking")
     @ApiOperation(value = "教师首页获取成绩排名")
-    public Map<String,Object> getNewGradeRenking(@ApiParam(name="teacher",value="筛选条件") @RequestBody(required = false) Teacher teacher ){
-
+    public Map<String,Object> getNewGradeRenking(){
+        String account = JwtUtil.getClaim(request.getHeader("Token"),"account");
+        List<Department> departments = departmentService.list();
+        List<Department> departmentList = new ArrayList<>();
+        Map<String,List<Department>> teacher_deps = departments.stream().collect(Collectors.groupingBy(Department::getCreatedBy));
+        if (teacher_deps.containsKey(account)){
+            departmentList = teacher_deps.get(account);
+        }
         return null;
     }
 

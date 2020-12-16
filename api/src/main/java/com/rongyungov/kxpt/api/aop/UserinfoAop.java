@@ -11,6 +11,10 @@ import com.rongyungov.framework.entity.*;
 import com.rongyungov.framework.service.*;
 import com.rongyungov.framework.shiro.util.JwtUtil;
 import com.rongyungov.framework.vo.UserVo;
+import com.rongyungov.kxpt.entity.DataList;
+import com.rongyungov.kxpt.entity.Department;
+import com.rongyungov.kxpt.service.DataListService;
+import com.rongyungov.kxpt.service.DepartmentService;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -18,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.xml.crypto.Data;
 import java.io.Serializable;
 import java.util.*;
 
@@ -43,12 +48,22 @@ public class UserinfoAop {
     @Autowired
     MenuService menuService;
 
+    @Autowired
+    DepartmentService departmentService;
+
+    @Autowired
+    DataListService dataListService;
+
     @Around("execution(* com.rongyungov.framework.baseapi.controller.UserController.info(..))")
-    public Result AfterLogin1(ProceedingJoinPoint joinPoint) throws Exception {
+    public Result afterUserinfo(ProceedingJoinPoint joinPoint) throws Exception {
         String account = JwtUtil.getClaim(request.getHeader("Token"), "account");
         User user = new User();
         user.setAccount(account);
         user = userService.getOne(new QueryWrapper(user));
+        if (user.getOrgid() != 0){
+            Department department = departmentService.getById(user.getOrgid());
+            user.setExt3(department.getName());
+        }
         UserVo userVo = new UserVo();
         ObjectUtils.fatherToChild(user, userVo);
 

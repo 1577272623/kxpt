@@ -5,10 +5,13 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.rongyungov.framework.base.Result;
 import com.rongyungov.framework.entity.User;
+import com.rongyungov.framework.entity.UserRole;
+import com.rongyungov.framework.service.UserRoleService;
 import com.rongyungov.framework.shiro.util.AesCipherUtil;
 import com.rongyungov.framework.shiro.util.JwtUtil;
 import com.rongyungov.kxpt.entity.*;
 import com.rongyungov.kxpt.service.*;
+import com.rongyungov.kxpt.utils.KxptConstant;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -58,6 +61,9 @@ public class TeacherController extends BaseController<TeacherService,Teacher> {
 
     @Autowired
     DataListService dataListService;
+
+    @Autowired
+    UserRoleService userRoleService;
 
     /**
      * @description : 获取分页列表
@@ -165,6 +171,37 @@ public class TeacherController extends BaseController<TeacherService,Teacher> {
         return success;
     }
 
+    /**
+     * @description : 通过id修改密码
+     * ---------------------------------
+     * @author : li
+     * @since : Create in 2020-11-11
+     */
+    @PutMapping("/updatepassword/{id}")
+    @ApiOperation(value="通过id修改密码")
+    public Result updatepasswordByid(@ApiParam(name="id",value="id主键值",required=true) @PathVariable Long id,
+                                       String olderpassword, String newpassword) throws Exception {
+        Teacher teacher = new Teacher();
+        Map<String,Object> reMap = new HashMap<>();
+        String account = JwtUtil.getClaim(request.getHeader("Token"),"account");
+        Teacher teacher1 = service.getOne(new QueryWrapper<Teacher>().eq("teano",account));
+        if(id!=null)
+            teacher.setId(id);
+        if (olderpassword != null){
+            String desEncryptnewpassword = null;
+            String encryptolderpassword = AesCipherUtil.encrypt(account+olderpassword);
+            if (encryptolderpassword.equalsIgnoreCase(teacher1.getPassword())){
+                desEncryptnewpassword = AesCipherUtil.encrypt(account+newpassword);
+            }else {
+                reMap.put("message","输入密码错误！");
+            }
+            teacher.setPassword(desEncryptnewpassword);
+        }
+        Boolean success=service.updateById(teacher);
+        reMap.put("is_success",success);
+        return Result.ok(reMap);
+    }
+
 
     /**
      * @description : 添加Teacher
@@ -183,7 +220,12 @@ public class TeacherController extends BaseController<TeacherService,Teacher> {
             throw new RuntimeException("教师已存在,不可重复");
         }
         teacher.setPassword(AesCipherUtil.encrypt(teacher.getTeano() + teacher.getPassword()));
-        Boolean success = ((TeacherService)this.service).save(teacher);
+        UserRole userRole = new UserRole();
+        userRole.setUserId(teacher.getId());
+        userRole.setRoleId(12L);
+        userRole.setUserNo(KxptConstant.USER_TYPE_STUDENT);
+        userRoleService.save(userRole);
+        Boolean success = service.save(teacher);
         return success;
 	}
 

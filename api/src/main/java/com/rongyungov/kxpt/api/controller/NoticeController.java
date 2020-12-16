@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.rongyungov.framework.entity.User;
 import com.rongyungov.framework.service.UserService;
+import com.rongyungov.framework.shiro.util.AesCipherUtil;
 import com.rongyungov.framework.shiro.util.JwtUtil;
 import com.rongyungov.kxpt.entity.*;
 import com.rongyungov.kxpt.service.DataListService;
@@ -20,6 +21,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import  com.rongyungov.framework.base.BaseController;
     import com.rongyungov.kxpt.service.NoticeService;
@@ -66,7 +68,10 @@ public class NoticeController extends BaseController<NoticeService,Notice> {
                                 @ApiParam(name="pageSize",value="页大小",required=true,defaultValue = "10")@RequestParam Integer pageSize
                                 ) throws InstantiationException, IllegalAccessException {
         Page<Notice> page=new Page<Notice>(pageIndex,pageSize);
-        QueryWrapper<Notice> queryWrapper= new QueryWrapper<>(new Notice());
+        String account = JwtUtil.getClaim(request.getHeader("Token"),"account");
+        Notice notice1 = new Notice();
+        notice1.setCreatedBy(account);
+        QueryWrapper<Notice> queryWrapper= new QueryWrapper<Notice>(notice1);
         List<DataList> dataLists = dataListService.list(new QueryWrapper<>(new DataList()));
         List<Department> departments = departmentService.list(new QueryWrapper<>());
         List<User> users = userService.list(new QueryWrapper<>());
@@ -190,11 +195,11 @@ public class NoticeController extends BaseController<NoticeService,Notice> {
 	@PostMapping("/add")
     @ApiOperation(value="添加Notice")
     public Boolean add(@RequestBody Notice  notice) {
-        Boolean success=service.save( notice);
         LocalDateTime dateTime = LocalDateTime.now();
         String account = JwtUtil.getClaim(request.getHeader("Token"), "account");
         notice.setCreatedBy(account);
         notice.setCreatedTime(dateTime);
+        Boolean success=service.save( notice);
         return success;
 	}
 
@@ -209,10 +214,11 @@ public class NoticeController extends BaseController<NoticeService,Notice> {
     public List<Notice> getClassNotice(@ApiParam(name="teacher",value="筛选条件") @RequestBody(required = false) Teacher teacher ) {
         List<Department> departmentList = departmentService.list(new QueryWrapper<Department>()
                 .ne("parent_id", "0"));
+        String account = JwtUtil.getClaim(request.getHeader("Token"), "account");
         List<Notice> notices = noticeService.list(new QueryWrapper<>());
         List<Notice> noticeList = new ArrayList<>();
         for (Department department : departmentList) {
-            if (department.getCreatedBy().equalsIgnoreCase(String.valueOf(teacher.getId()))) {
+            if (department.getCreatedBy().equalsIgnoreCase(account)) {
                 for (Notice notice: notices){
                     String notice_class = notice.getClassNo();
                     String[] notice_classList = notice_class.split(",");

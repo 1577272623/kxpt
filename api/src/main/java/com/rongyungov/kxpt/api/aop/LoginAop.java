@@ -59,9 +59,8 @@ public class LoginAop {
     Message message;
 
 
-//    @Around("execution(* com.rongyungov.kxpt.api.controller.Userlogin.StudentLogin(..))")
     @Around("execution(* com.rongyungov.framework.baseapi.controller.LoginController.login(..))")
-    public Result AfterLogin1(ProceedingJoinPoint joinPoint) throws Exception {
+    public Result afterLogin1(ProceedingJoinPoint joinPoint) throws Exception {
 
         Map<String,Object> reMap = new HashMap<>();
 

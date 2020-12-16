@@ -174,6 +174,7 @@ public class DataListController extends BaseController<DataListService,DataList>
 //                reMap.put("url",url);
 //                reMap.put("success",success);
                 reMap.put("id",dataList.getId());
+                reMap.put("url",url);
             }
         } catch (IOException var7) {
             var7.printStackTrace();

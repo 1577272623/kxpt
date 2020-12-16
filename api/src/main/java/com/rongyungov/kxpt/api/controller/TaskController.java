@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.rongyungov.framework.base.Result;
 import com.rongyungov.framework.shiro.util.JwtUtil;
+import com.rongyungov.kxpt.api.vo.ClassTaskVo;
 import com.rongyungov.kxpt.api.vo.TableVo;
 import com.rongyungov.kxpt.entity.*;
 import com.rongyungov.kxpt.service.*;
@@ -23,6 +24,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import  com.rongyungov.framework.base.BaseController;
 import org.springframework.web.multipart.MultipartFile;
@@ -255,7 +257,7 @@ public class TaskController extends BaseController<TaskService,Task> {
      * @since : Create in 2020-11-11
      */
     @PostMapping("/classtaskDA")
-    @ApiOperation(value = "班级任务")
+    @ApiOperation(value = "获取班级任务")
     public Map<String,Object> getclasstaskDA( String class_id,String task_id ) {
         QueryWrapper<Department> departmentQueryWrapper;
         QueryWrapper<Task> taskQueryWrapper;
@@ -271,17 +273,23 @@ public class TaskController extends BaseController<TaskService,Task> {
         }
         List<Task> tasks = taskService.list(taskQueryWrapper);
         List<Department> departmentList = departmentService.list(departmentQueryWrapper);
-        List<DepTask> depTasks = depTaskService.list(new QueryWrapper<>());
-        List<Student> students = studentService.list(new QueryWrapper<>());
-        List<Grade> grades = gradeService.list(new QueryWrapper<>());
+        List<DepTask> depTasks = depTaskService.list();
+        List<Student> students = studentService.list();
+        Map<String, List<Student>> deStudents = students.stream().collect(Collectors.groupingBy(Student::getClassno));
+        List<Grade> grades = gradeService.list();
         String account = JwtUtil.getClaim(request.getHeader("Token"), "account");
         Map<String,Object> class_taskmap = new HashMap<>();
         for (Department department : departmentList) {
-
-            ArrayList<Task> taskList = new ArrayList<>();
             if (department.getCreatedBy().equalsIgnoreCase(account)) {
+                List<Task> taskList = new ArrayList<>();
+                List<ClassTaskVo> classTaskVos = new ArrayList<>();
                 int task_count = 0; //班级任务数
-
+                int student_count = 0; //班级学生数
+                if(deStudents.containsKey(department.getId()+"")){
+                    student_count = deStudents.get(department.getId()+"").size();
+                }else{
+                    student_count = 0;
+                }
                 for (DepTask depTask:depTasks){
                     if (depTask.getDepartId().equalsIgnoreCase(String.valueOf(department.getId()))){
                         task_count++;
@@ -296,19 +304,20 @@ public class TaskController extends BaseController<TaskService,Task> {
                                         }
                                     }
                                 }
-                                task.setOk_num(student_do);
-                                taskList.add(task);
+                                ClassTaskVo classTaskVo = new ClassTaskVo(task.getId(),
+                                        department.getId(),
+                                        task.getType(),
+                                        task.getName(),
+                                        task.getDescription(),
+                                        student_do,
+                                        student_count,
+                                        task_count);
+                                classTaskVos.add(classTaskVo);
                             }
                         }
                     }
                 }
-                int student_count = 0; //班级学生数
-                for (Student student:students){
-                    if (student.getClassno().equalsIgnoreCase(String.valueOf(department.getId()))){
-                        student_count++;
-                    }
-                }
-                class_taskmap.put(department.getName(),taskList);
+                class_taskmap.put(department.getName(),classTaskVos);
             }
         }
         return class_taskmap;
