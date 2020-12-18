@@ -60,10 +60,21 @@ public class UserinfoAop {
         User user = new User();
         user.setAccount(account);
         user = userService.getOne(new QueryWrapper(user));
-        if (user.getOrgid() != 0){
-            Department department = departmentService.getById(user.getOrgid());
-            user.setExt3(department.getName());
+        Department department = departmentService.getById(user.getOrgid());
+        if (user.getUserTypeCode().equalsIgnoreCase("3")){ //教师信息
+            if (user.getOrgid() != 0){
+                user.setExt3(department.getName());
+            }
         }
+        if (user.getUserTypeCode().equalsIgnoreCase("2")){ //学生信息
+            if (user.getOrgid() != 0){
+                user.setExt1(department.getName());  //班级
+                Department department1 = departmentService.getById(department.getParentId());
+                user.setExt3(department1.getName());  //院系
+
+            }
+        }
+
         UserVo userVo = new UserVo();
         ObjectUtils.fatherToChild(user, userVo);
 

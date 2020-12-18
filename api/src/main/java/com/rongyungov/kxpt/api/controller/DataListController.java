@@ -171,8 +171,6 @@ public class DataListController extends BaseController<DataListService,DataList>
             Boolean success = service.save(dataList);
             if (success){
                 multipartFile.transferTo(d);
-//                reMap.put("url",url);
-//                reMap.put("success",success);
                 reMap.put("id",dataList.getId());
                 reMap.put("url",url);
             }
@@ -182,29 +180,5 @@ public class DataListController extends BaseController<DataListService,DataList>
         }
         return Result.ok(reMap);
     }
-
-    @PostMapping("/uploads")
-    @ApiOperation(value="多文件上传")
-    public Result uploads(@RequestParam("files") MultipartFile[] multipartFiles) throws Exception {
-        if (multipartFiles != null && multipartFiles.length != 0) {
-            List<String> urls = new ArrayList();
-            for(int i = 0; i < multipartFiles.length; ++i) {
-                String fileName = FileUtils.randomNameFile(multipartFiles[i]);
-                String filePath = this.defaultpath;
-                String fileType = "imgs";
-                if (!FileUtils.isImage(fileName)) {
-                    fileType = "file";
-                }
-                File d = new File(filePath + "/" + fileType + "/" + fileName);
-                multipartFiles[i].transferTo(d);
-                String url = "/" + fileType + "/" + fileName;
-                urls.add(url);
-            }
-            return Result.ok(urls);
-        } else {
-            throw new Exception("文件为空,上传失败");
-        }
-    }
-
 
 }

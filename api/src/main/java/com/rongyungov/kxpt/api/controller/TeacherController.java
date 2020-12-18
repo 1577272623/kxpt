@@ -241,8 +241,7 @@ public class TeacherController extends BaseController<TeacherService,Teacher> {
     @PostMapping("/readsaiImport")
     @ApiOperation(value="批量读取竞赛Student")
     public Result readsai(MultipartFile excel) throws Exception {
-        //模拟 竞赛名称
-        String contest_name = "十校联考";
+        String contest_name = "十校联考";//模拟 竞赛名称
         String account = JwtUtil.getClaim(request.getHeader("Token"), "account");
         String default_password = "123456"; //初始密码
         List<Student> students = new ArrayList<>();

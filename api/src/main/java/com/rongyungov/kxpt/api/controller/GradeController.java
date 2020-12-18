@@ -5,9 +5,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.rongyungov.framework.shiro.util.JwtUtil;
 import com.rongyungov.kxpt.entity.*;
-import com.rongyungov.kxpt.service.DepartmentService;
-import com.rongyungov.kxpt.service.GradeVoService;
-import com.rongyungov.kxpt.service.StudentService;
+import com.rongyungov.kxpt.service.*;
 import com.sun.org.apache.regexp.internal.RE;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -25,7 +23,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import  com.rongyungov.framework.base.BaseController;
-    import com.rongyungov.kxpt.service.GradeService;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -53,6 +50,10 @@ public class GradeController extends BaseController<GradeService,Grade> {
     @Autowired
     DepartmentService departmentService;
 
+    @Autowired
+    ExamService examService;
+
+
 
     /**
      * @description : 获取分页列表
@@ -62,36 +63,23 @@ public class GradeController extends BaseController<GradeService,Grade> {
      */
     @PostMapping("/list")
     @ApiOperation(value = "获取分页数据信息")
-    public IPage<Grade> getGradeList( @ApiParam(name="grade",value="筛选条件") @RequestBody(required = false) Grade grade  ,
+    public IPage<GradeVo> getGradeList( @ApiParam(name="grade",value="筛选条件") @RequestBody(required = false) Grade grade  ,
                                 @ApiParam(name="pageIndex",value="页数",required=true,defaultValue = "1")@RequestParam Integer pageIndex ,
                                 @ApiParam(name="pageSize",value="页大小",required=true,defaultValue = "10")@RequestParam Integer pageSize
                                 ) throws InstantiationException, IllegalAccessException {
-        Page<Grade> page=new Page<Grade>(pageIndex,pageSize);
-        QueryWrapper<Grade> queryWrapper=new QueryWrapper<>(new Grade());
+        Page<GradeVo> page=new Page<GradeVo>(pageIndex,pageSize);
+        QueryWrapper<GradeVo> queryWrapper=new QueryWrapper<>(new GradeVo());
         queryWrapper.orderByDesc("grade");
         if (grade.getDepartment() != null){
             queryWrapper.eq("department",grade.getDepartment());
         }
-
         if (grade.getType() != null){
             queryWrapper.eq("type",grade.getType());
         }
         if (grade.getExamId() != null){
             queryWrapper.eq("exam_id",grade.getExamId());
         }
-        IPage<Grade> gradeIPage = service.page(page,queryWrapper);
-//        List<GradeVo> students = gradeVoService.list(new QueryWrapper<GradeVo>().eq("department",grade.getDepartment()));
-
-        List<Student> students = studentService.list(new QueryWrapper<Student>().eq("classno",grade.getDepartment()));
-        for (int j =0; j<gradeIPage.getRecords().size(); j++){
-            for (Student student: students){
-                if (String.valueOf(student.getId()).equals(gradeIPage.getRecords().get(j).getStudent())){
-                    gradeIPage.getRecords().get(j).setStudent(student.getName());
-                    gradeIPage.getRecords().get(j).setExt1(student.getNo());
-                }
-            }
-
-        }
+        IPage<GradeVo> gradeIPage = gradeVoService.page(page,queryWrapper);
         return gradeIPage;
     }
 
@@ -179,17 +167,34 @@ public class GradeController extends BaseController<GradeService,Grade> {
      */
     @PostMapping("/getGradeRenking")
     @ApiOperation(value = "教师首页获取成绩排名")
-    public Map<String,Object> getNewGradeRenking(){
+    public List<GradeVo> getNewGradeRenking(){
         String account = JwtUtil.getClaim(request.getHeader("Token"),"account");
         List<Department> departments = departmentService.list();
-        List<Department> departmentList = new ArrayList<>();
+        QueryWrapper<Exam> examQueryWrapper = new QueryWrapper<>();
+        examQueryWrapper.eq("tea_no",account).orderByDesc("created_time").last("limit 0, 1");
+        Exam exam = examService.getOne(examQueryWrapper);//获取教师发布的最新的一个考试
+        String exam_class = exam.getClassNo();
+        String[] strings = exam_class.split(",");
         Map<String,List<Department>> teacher_deps = departments.stream().collect(Collectors.groupingBy(Department::getCreatedBy));
+        Long dep_id = 0L;
         if (teacher_deps.containsKey(account)){
-            departmentList.addAll(teacher_deps.get(account));
-        }
-        for (Department department:departmentList){
 
+            for (Department department: teacher_deps.get(account)){
+                for (int i=0; i<strings.length; i++){
+                    if ( strings[i].equalsIgnoreCase(department.getId()+"")){
+                        dep_id = department.getId();
+                        QueryWrapper<GradeVo> gradeVoQueryWrapper = new QueryWrapper<>();
+                        gradeVoQueryWrapper.eq("exam_id",exam.getId()).eq("department",dep_id).eq("type","1").orderByDesc("grade");
+                        List<GradeVo> gradeVos = gradeVoService.list(gradeVoQueryWrapper);
+                        if (gradeVos != null){
+                            return gradeVos;
+                        }
+
+                    }
+                }
+            }
         }
+
         return null;
     }
 

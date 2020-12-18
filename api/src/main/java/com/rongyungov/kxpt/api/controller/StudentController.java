@@ -4,19 +4,20 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.rongyungov.framework.base.Result;
+import com.rongyungov.framework.entity.User;
 import com.rongyungov.framework.entity.UserRole;
 import com.rongyungov.framework.service.UserRoleService;
+import com.rongyungov.framework.service.UserService;
 import com.rongyungov.framework.shiro.util.AesCipherUtil;
 import com.rongyungov.framework.shiro.util.JwtUtil;
-import com.rongyungov.kxpt.entity.DepTask;
-import com.rongyungov.kxpt.entity.Task;
-import com.rongyungov.kxpt.entity.Test;
+import com.rongyungov.kxpt.entity.*;
 import com.rongyungov.kxpt.service.DepTaskService;
 import com.rongyungov.kxpt.service.TaskService;
 import com.rongyungov.kxpt.utils.KxptConstant;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import lombok.AllArgsConstructor;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -31,7 +32,6 @@ import java.util.Map;
 
 import  com.rongyungov.framework.base.BaseController;
     import com.rongyungov.kxpt.service.StudentService;
-import  com.rongyungov.kxpt.entity.Student;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
@@ -59,6 +59,9 @@ public class StudentController extends BaseController<StudentService,Student> {
 
     @Autowired
     UserRoleService userRoleService;
+
+    @Autowired
+    UserService userService;
 
     /**
      * @description : 获取分页列表
@@ -141,6 +144,37 @@ public class StudentController extends BaseController<StudentService,Student> {
     }
 
     /**
+     * @description : 通过id修改密码
+     * ---------------------------------
+     * @author : li
+     * @since : Create in 2020-11-11
+     */
+    @PutMapping("/updatepassword/{id}")
+    @ApiOperation(value="通过id修改密码")
+    public Result updatepasswordByid(@ApiParam(name="id",value="id主键值",required=true) @PathVariable Long id,
+                                     String olderpassword, String newpassword) throws Exception {
+        Student student = new Student();
+        Map<String,Object> reMap = new HashMap<>();
+        String account = JwtUtil.getClaim(request.getHeader("Token"),"account");
+        Student student1 = service.getOne(new QueryWrapper<Student>().eq("no",account));
+        if(id!=null)
+            student.setId(id);
+        if (olderpassword != null){
+            String desEncryptnewpassword = null;
+            String encryptolderpassword = AesCipherUtil.encrypt(account+olderpassword);
+            if (encryptolderpassword.equalsIgnoreCase(student1.getPassword())){
+                desEncryptnewpassword = AesCipherUtil.encrypt(account+newpassword);
+            }else {
+                reMap.put("message","输入密码错误！");
+            }
+            student.setPassword(desEncryptnewpassword);
+        }
+        Boolean success=service.updateById(student);
+        reMap.put("is_success",success);
+        return Result.ok(reMap);
+    }
+
+    /**
      * @description : 添加Student
      * ---------------------------------
      * @author : li
@@ -171,15 +205,24 @@ public class StudentController extends BaseController<StudentService,Student> {
 
 
 	@PostMapping("/task")
-    @ApiOperation(value = "获取任务列表")
-    public List<Task> task(@RequestBody Student  student){
+    @ApiOperation(value = "获取我的任务列表")
+    public List<Task> task(){
+	    String account = JwtUtil.getClaim(request.getHeader("Token"),"account");
+	    Student student = service.getOne(new QueryWrapper<Student>().eq("no",account));
         List<DepTask> deptaskList = depTaskService.list(new QueryWrapper<DepTask>().eq("depart_id",student.getClassno()));
         List<Task> taskList = taskService.list(new QueryWrapper<>());
+        List<User> users = userService.list();
         List<String>  ids=new ArrayList<>();
         List<Task> tasks = new ArrayList<>();
         for (DepTask depTask:deptaskList) {
             for (Task task:taskList){
-                if(depTask.getTaskId().equals(String.valueOf(task.getId()))){
+                if(depTask.getTaskId().equals(task.getId()+"")){
+                    task.setCreatedTime(depTask.getCreatedTime());
+                    for (User user :users){
+                        if (user.getAccount().equalsIgnoreCase(depTask.getCreatedBy())){
+                            task.setCreatedBy(user.getUsername());
+                        }
+                    }
                     tasks.add(task);
                 }
             }
